@@ -25,7 +25,7 @@ typedef enum {
     Punctuator_CloseBrace,
 } token_punctuator_t;
 
-const char* punctuator_as_string(token_punctuator_t p) {
+const char *punctuator_as_string(token_punctuator_t p) {
     switch (p) {
     case Punctuator_OpenBrace:
         return "\"{\"";
@@ -49,19 +49,15 @@ typedef struct {
         // Token_Keyword
         token_keyword_t keyword;
         // Token_Identifier, Token_Constant
-        const char* str;
+        const char *str;
         // Token_Punctuator
         token_punctuator_t punctuator;
     };
 } token_t;
 
-bool iswhitespace(char c) {
-    return c == ' ' || c == '\t';
-}
+bool iswhitespace(char c) { return c == ' ' || c == '\t'; }
 
-bool isnondigit(char c) {
-    return c == '_' || isalpha(c);
-}
+bool isnondigit(char c) { return c == '_' || isalpha(c); }
 
 bool ispunctuation(char c) {
     return c == '(' || c == ')' || c == '{' || c == '}' || c == ';';
@@ -79,23 +75,24 @@ typedef enum {
 
 void emit(token_t tok) {
     switch (tok.discrim) {
-        // case Token_Keyword:
-        //     printf("Token_Keyword    { .str = %s }\n");
-        //     break;
-        case Token_Identifier:
-            printf("Token_Identifier { .str = \"%s\" }\n", tok.str);
-            break;
-        case Token_Constant:
-            printf("Token_Constant   { .str = \"%s\" }\n", tok.str);
-            break;
-        case Token_Punctuator:
-            printf("Token_Punctuator { .punctuator = %s }\n", punctuator_as_string(tok.punctuator));
-            break;
+    // case Token_Keyword:
+    //     printf("Token_Keyword    { .str = %s }\n");
+    //     break;
+    case Token_Identifier:
+        printf("Token_Identifier { .str = \"%s\" }\n", tok.str);
+        break;
+    case Token_Constant:
+        printf("Token_Constant   { .str = \"%s\" }\n", tok.str);
+        break;
+    case Token_Punctuator:
+        printf("Token_Punctuator { .punctuator = %s }\n",
+               punctuator_as_string(tok.punctuator));
+        break;
     }
 }
 
 int main() {
-    const char* prog = "int main() { return 0; }";
+    const char *prog = "int main() { return 0; }";
     size_t len = strlen(prog);
     int start = 0;
     int idx = 0;
@@ -134,12 +131,12 @@ int main() {
                 idx++;
             } else {
                 size_t len = idx - start;
-                char* str = (char*)malloc(len);
+                char *str = (char *)malloc(len);
                 strncpy(str, &prog[start], len);
 
-                emit(token_t{
+                emit((token_t){
                     .discrim = Token_Constant,
-                    { .str = str },
+                    {.str = str},
                 });
 
                 state = State_Initial;
@@ -152,12 +149,12 @@ int main() {
                 idx++;
             } else {
                 size_t len = idx - start;
-                char* str = (char*)malloc(len);
+                char *str = (char *)malloc(len);
                 strncpy(str, &prog[start], len);
 
-                emit(token_t{
+                emit((token_t){
                     .discrim = Token_Identifier,
-                    { .str = str },
+                    {.str = str},
                 });
 
                 state = State_Initial;
@@ -168,45 +165,45 @@ int main() {
         case State_Punctuation:
             switch (c) {
             case ';':
-                emit(token_t{
+                emit((token_t){
                     .discrim = Token_Punctuator,
-                    { .punctuator = Punctuator_Semicolon },
+                    {.punctuator = Punctuator_Semicolon},
                 });
 
                 idx++;
                 state = State_Initial;
                 break;
             case '{':
-                emit(token_t{
+                emit((token_t){
                     .discrim = Token_Punctuator,
-                    { .punctuator = Punctuator_OpenBrace },
+                    {.punctuator = Punctuator_OpenBrace},
                 });
 
                 idx++;
                 state = State_Initial;
                 break;
             case '}':
-                emit(token_t{
+                emit((token_t){
                     .discrim = Token_Punctuator,
-                    { .punctuator = Punctuator_CloseBrace },
+                    {.punctuator = Punctuator_CloseBrace},
                 });
 
                 idx++;
                 state = State_Initial;
                 break;
             case '(':
-                emit(token_t{
+                emit((token_t){
                     .discrim = Token_Punctuator,
-                    { .punctuator = Punctuator_OpenParen },
+                    {.punctuator = Punctuator_OpenParen},
                 });
 
                 idx++;
                 state = State_Initial;
                 break;
             case ')':
-                emit(token_t{
+                emit((token_t){
                     .discrim = Token_Punctuator,
-                    { .punctuator = Punctuator_CloseParen },
+                    {.punctuator = Punctuator_CloseParen},
                 });
 
                 idx++;

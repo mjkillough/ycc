@@ -139,7 +139,7 @@ int main() {
 
                 emit(token_t{
                     .discrim = Token_Constant,
-                    .str = str,
+                    { .str = str },
                 });
 
                 state = State_Initial;
@@ -157,7 +157,7 @@ int main() {
 
                 emit(token_t{
                     .discrim = Token_Identifier,
-                    .str = str,
+                    { .str = str },
                 });
 
                 state = State_Initial;
@@ -170,7 +170,7 @@ int main() {
             case ';':
                 emit(token_t{
                     .discrim = Token_Punctuator,
-                    .punctuator = Punctuator_Semicolon,
+                    { .punctuator = Punctuator_Semicolon },
                 });
 
                 idx++;
@@ -179,7 +179,7 @@ int main() {
             case '{':
                 emit(token_t{
                     .discrim = Token_Punctuator,
-                    .punctuator = Punctuator_OpenBrace,
+                    { .punctuator = Punctuator_OpenBrace },
                 });
 
                 idx++;
@@ -188,7 +188,7 @@ int main() {
             case '}':
                 emit(token_t{
                     .discrim = Token_Punctuator,
-                    .punctuator = Punctuator_CloseBrace,
+                    { .punctuator = Punctuator_CloseBrace },
                 });
 
                 idx++;
@@ -197,7 +197,7 @@ int main() {
             case '(':
                 emit(token_t{
                     .discrim = Token_Punctuator,
-                    .punctuator = Punctuator_OpenParen,
+                    { .punctuator = Punctuator_OpenParen },
                 });
 
                 idx++;
@@ -206,7 +206,7 @@ int main() {
             case ')':
                 emit(token_t{
                     .discrim = Token_Punctuator,
-                    .punctuator = Punctuator_CloseParen,
+                    { .punctuator = Punctuator_CloseParen },
                 });
 
                 idx++;

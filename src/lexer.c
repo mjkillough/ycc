@@ -100,6 +100,8 @@ bool lexer_next_token(const char **prog, token_t *next) {
 
         switch (state) {
         case State_Initial:
+            start = *prog;
+
             if (iswhitespace(c)) {
                 (*prog)++;
             } else if (isdigit(c)) {

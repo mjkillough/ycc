@@ -17,7 +17,7 @@ typedef enum {
     Keyword_return,
 } token_keyword_t;
 
-const struct {
+static const struct {
     token_keyword_t keyword;
     const char *str;
 } keywords[] = {
@@ -25,7 +25,7 @@ const struct {
     {Keyword_return, "return"},
 };
 
-bool lookup_keyword(const char *str, size_t len, token_keyword_t *out) {
+static bool lookup_keyword(const char *str, size_t len, token_keyword_t *out) {
     for (size_t i = 0; i < sizeof(keywords) / sizeof(keywords[0]); i++) {
         if (strncmp(str, keywords[i].str, len) == 0) {
             *out = keywords[i].keyword;
@@ -35,7 +35,7 @@ bool lookup_keyword(const char *str, size_t len, token_keyword_t *out) {
     return false;
 }
 
-const char *keyword_as_string(token_keyword_t keyword) {
+static const char *keyword_as_string(token_keyword_t keyword) {
     for (size_t i = 0; i < sizeof(keywords) / sizeof(keywords[0]); i++) {
         if (keywords[i].keyword == keyword) {
             return keywords[i].str;
@@ -52,7 +52,7 @@ typedef enum {
     Punctuator_CloseBrace,
 } token_punctuator_t;
 
-const char *punctuator_as_string(token_punctuator_t p) {
+static const char *punctuator_as_string(token_punctuator_t p) {
     switch (p) {
     case Punctuator_OpenBrace:
         return "{";
@@ -82,11 +82,11 @@ typedef struct {
     };
 } token_t;
 
-bool iswhitespace(char c) { return c == ' ' || c == '\t'; }
+static bool iswhitespace(char c) { return c == ' ' || c == '\t'; }
 
-bool isnondigit(char c) { return c == '_' || isalpha(c); }
+static bool isnondigit(char c) { return c == '_' || isalpha(c); }
 
-bool ispunctuation(char c) {
+static bool ispunctuation(char c) {
     return c == '(' || c == ')' || c == '{' || c == '}' || c == ';';
 }
 
@@ -100,7 +100,7 @@ typedef enum {
     State_Punctuation,
 } state_t;
 
-void emit(token_t tok) {
+void lexer_print_token(token_t tok) {
     switch (tok.discrim) {
     case Token_Keyword:
         printf("Token_Keyword    { .keyword = %s }\n",
@@ -119,31 +119,26 @@ void emit(token_t tok) {
     }
 }
 
-int main() {
-    const char *prog = "int main() { return 0; }";
-    size_t len = strlen(prog);
-    size_t start = 0;
-    size_t idx = 0;
+bool lexer_next_token(const char **prog, token_t *next) {
+    const char *start = *prog;
     state_t state = State_Initial;
 
     while (true) {
-        if (idx == len) {
-            break;
-        }
+        char c = (*prog)[0];
 
-        char c = prog[idx];
+        if (c == '\0') {
+            return false;
+        }
 
         switch (state) {
         case State_Initial:
-            start = idx;
-
             if (iswhitespace(c)) {
-                idx++;
+                (*prog)++;
             } else if (isdigit(c)) {
-                idx++;
+                (*prog)++;
                 state = State_Constant;
             } else if (isnondigit(c)) {
-                idx++;
+                (*prog)++;
                 state = State_Word;
             } else if (ispunctuation(c)) {
                 state = State_Punctuation;
@@ -156,100 +151,96 @@ int main() {
 
         case State_Constant:
             if (isdigit(c)) {
-                idx++;
+                (*prog)++;
             } else {
-                size_t len = idx - start;
+                size_t len = *prog - start;
                 char *str = (char *)malloc(len);
-                strncpy(str, &prog[start], len);
+                strncpy(str, start, len);
 
-                emit((token_t){
+                *next = (token_t){
                     .discrim = Token_Constant,
                     .str = str,
-                });
-
-                state = State_Initial;
+                };
+                return true;
             }
 
             break;
 
         case State_Word:
             if (isnondigit(c) || isdigit(c)) {
-                idx++;
+                (*prog)++;
             } else {
-                size_t len = idx - start;
+                size_t len = *prog - start;
 
                 token_keyword_t keyword;
-                if (lookup_keyword(&prog[start], len, &keyword)) {
-                    emit((token_t){
+                if (lookup_keyword(start, len, &keyword)) {
+                    *next = (token_t){
                         .discrim = Token_Keyword,
                         .keyword = keyword,
-                    });
+                    };
+                    return true;
                 } else {
                     char *str = (char *)malloc(len);
-                    strncpy(str, &prog[start], len);
+                    strncpy(str, start, len);
 
-                    emit((token_t){
+                    *next = (token_t){
                         .discrim = Token_Identifier,
                         .str = str,
-                    });
+                    };
+                    return true;
                 }
-
-                state = State_Initial;
             }
-
             break;
 
         case State_Punctuation:
+            (*prog)++;
+
             switch (c) {
             case ';':
-                emit((token_t){
+                *next = (token_t){
                     .discrim = Token_Punctuator,
                     .punctuator = Punctuator_Semicolon,
-                });
-
-                idx++;
-                state = State_Initial;
-                break;
+                };
+                return true;
             case '{':
-                emit((token_t){
+                *next = (token_t){
                     .discrim = Token_Punctuator,
                     .punctuator = Punctuator_OpenBrace,
-                });
-
-                idx++;
-                state = State_Initial;
-                break;
+                };
+                return true;
             case '}':
-                emit((token_t){
+                *next = (token_t){
                     .discrim = Token_Punctuator,
                     .punctuator = Punctuator_CloseBrace,
-                });
-
-                idx++;
-                state = State_Initial;
-                break;
+                };
+                return true;
             case '(':
-                emit((token_t){
+                *next = (token_t){
                     .discrim = Token_Punctuator,
                     .punctuator = Punctuator_OpenParen,
-                });
-
-                idx++;
-                state = State_Initial;
-                break;
+                };
+                return true;
             case ')':
-                emit((token_t){
+                *next = (token_t){
                     .discrim = Token_Punctuator,
                     .punctuator = Punctuator_CloseParen,
-                });
-
-                idx++;
-                state = State_Initial;
-                break;
+                };
+                return true;
             default:
                 printf("lexer: unexpected punctuator: '%c'\n", c);
                 exit(-1);
             }
         }
     }
+}
+
+int main() {
+    const char *prog = "int main() { return 0; }";
+
+    token_t token;
+    while (lexer_next_token(&prog, &token)) {
+        lexer_print_token(token);
+    }
+
+    return 0;
 }

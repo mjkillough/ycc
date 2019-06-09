@@ -4,18 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef enum {
-    Token_Keyword,
-    Token_Identifier,
-    Token_Constant,
-    // Token_StringLiteral,
-    Token_Punctuator
-} token_discrim_t;
-
-typedef enum {
-    Keyword_int,
-    Keyword_return,
-} token_keyword_t;
+#include "lexer.h"
 
 static const struct {
     token_keyword_t keyword;
@@ -44,14 +33,6 @@ static const char *keyword_as_string(token_keyword_t keyword) {
     return "UNKNOWN_KEYWORD";
 }
 
-typedef enum {
-    Punctuator_Semicolon,
-    Punctuator_OpenParen,
-    Punctuator_CloseParen,
-    Punctuator_OpenBrace,
-    Punctuator_CloseBrace,
-} token_punctuator_t;
-
 static const char *punctuator_as_string(token_punctuator_t p) {
     switch (p) {
     case Punctuator_OpenBrace:
@@ -68,19 +49,6 @@ static const char *punctuator_as_string(token_punctuator_t p) {
         return "UNKNOWN";
     }
 }
-
-typedef struct {
-    token_discrim_t discrim;
-
-    union {
-        // Token_Keyword
-        token_keyword_t keyword;
-        // Token_Identifier, Token_Constant
-        const char *str;
-        // Token_Punctuator
-        token_punctuator_t punctuator;
-    };
-} token_t;
 
 static bool iswhitespace(char c) { return c == ' ' || c == '\t'; }
 
@@ -232,15 +200,4 @@ bool lexer_next_token(const char **prog, token_t *next) {
             }
         }
     }
-}
-
-int main() {
-    const char *prog = "int main() { return 0; }";
-
-    token_t token;
-    while (lexer_next_token(&prog, &token)) {
-        lexer_print_token(token);
-    }
-
-    return 0;
 }

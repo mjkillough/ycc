@@ -94,8 +94,8 @@ void emit(token_t tok) {
 int main() {
     const char *prog = "int main() { return 0; }";
     size_t len = strlen(prog);
-    int start = 0;
-    int idx = 0;
+    size_t start = 0;
+    size_t idx = 0;
     state_t state = State_Initial;
 
     while (true) {

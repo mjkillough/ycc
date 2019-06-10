@@ -1,11 +1,12 @@
 #include <stdio.h>
 
 #include "ast.h"
+#include "gen.h"
 #include "lexer.h"
 #include "parser.h"
 
 int main() {
-    const char *prog = "int main() { return 0; }";
+    const char *prog = "int main() { return 4; }";
 
     // token_t token;
     // while (lexer_next_token(&prog, &token)) {
@@ -18,7 +19,21 @@ int main() {
         return -1;
     }
 
+    printf("---\n\n");
+    printf("AST:\n");
     ast_print_program(program);
+
+    printf("---\n\n");
+    printf("ASM:\n");
+    gen_generate(stdout, program);
+
+    FILE *f = fopen("out.s", "w");
+    if (f == NULL) {
+        printf("error: opening out.s\n");
+        return -1;
+    }
+    gen_generate(f, program);
+    fclose(f);
 
     return 0;
 }

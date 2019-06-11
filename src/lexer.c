@@ -55,7 +55,7 @@ static bool iswhitespace(char c) { return c == ' ' || c == '\t'; }
 static bool isnondigit(char c) { return c == '_' || isalpha(c); }
 
 static bool ispunctuation(char c) {
-    return c == '(' || c == ')' || c == '{' || c == '}' || c == ';';
+    return c == '(' || c == ')' || c == '{' || c == '}' || c == ';' || c == '+';
 }
 
 typedef enum {
@@ -170,6 +170,12 @@ bool lexer_next_token(const char **prog, token_t *next) {
                 *next = (token_t){
                     .discrim = Token_Punctuator,
                     .punctuator = Punctuator_Semicolon,
+                };
+                return true;
+            case '+':
+                *next = (token_t){
+                    .discrim = Token_Punctuator,
+                    .punctuator = Punctuator_Plus,
                 };
                 return true;
             case '{':

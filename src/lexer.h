@@ -17,6 +17,7 @@ typedef enum {
 
 typedef enum {
     Punctuator_Semicolon,
+    Punctuator_Plus,
     Punctuator_OpenParen,
     Punctuator_CloseParen,
     Punctuator_OpenBrace,

@@ -1,7 +1,12 @@
 #pragma once
 
-typedef struct {
+typedef struct ast_expr_t {
+    enum {
+        Ast_Expr_Constant,
+        Ast_Expr_Addition,
+    } discrim;
     const char *str;
+    struct ast_expr_t *rhs;
 } ast_expr_t;
 
 typedef struct {

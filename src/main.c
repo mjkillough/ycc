@@ -6,7 +6,7 @@
 #include "parser.h"
 
 int main() {
-    const char *prog = "int main() { return 4; }";
+    const char *prog = "int main() { return 4 + 5; }";
 
     // token_t token;
     // while (lexer_next_token(&prog, &token)) {
@@ -18,6 +18,10 @@ int main() {
         printf("error parsing\n");
         return -1;
     }
+
+    printf("---\n\n");
+    printf("Source:\n");
+    printf("%s\n", prog);
 
     printf("---\n\n");
     printf("AST:\n");

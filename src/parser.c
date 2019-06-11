@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "ast.h"
 #include "lexer.h"
@@ -33,14 +34,32 @@ static bool identifier(state_t *state, const char **str) {
     return false;
 }
 
-// <expr> ::= <int>
+// <expr> ::= <int> | <int> + <expr>
 static bool parse_expr(state_t *state, ast_expr_t *expr) {
-    if (state->token.discrim == Token_Constant) {
-        *expr = (ast_expr_t){.str = state->token.str};
-        advance(state);
+    if (state->token.discrim != Token_Constant) {
+        printf("error: expected integer\n");
+        return false;
+    }
+
+    const char *constant = state->token.str;
+    advance(state);
+
+    if (!punctuator(state, Punctuator_Plus)) {
+        *expr = (ast_expr_t){.discrim = Ast_Expr_Constant, .str = constant};
         return true;
     }
-    return false;
+    advance(state);
+
+    ast_expr_t *rhs = malloc(sizeof(ast_expr_t));
+    if (!parse_expr(state, rhs)) {
+        printf("error: expected expr\n");
+        return false;
+    }
+
+    *expr =
+        (ast_expr_t){.discrim = Ast_Expr_Addition, .str = constant, .rhs = rhs};
+
+    return true;
 }
 
 // <statement> ::= "return" <expr> ";"

@@ -34,32 +34,90 @@ static bool identifier(state_t *state, const char **str) {
     return false;
 }
 
-// <expr> ::= <int> | <int> + <expr>
-static bool parse_expr(state_t *state, ast_expr_t *expr) {
+// <expr-primary> = <constant>
+static bool parse_expr_primary(state_t *state, ast_expr_t *expr) {
     if (state->token.discrim != Token_Constant) {
         printf("error: expected integer\n");
         return false;
     }
 
-    const char *constant = state->token.str;
+    *expr = (ast_expr_t){
+        .discrim = Ast_Expr_Constant,
+        .str = state->token.str,
+    };
+
     advance(state);
 
+    return true;
+}
+
+// <expr-unary> = - <expr-primary>
+static bool parse_expr_unary(state_t *state, ast_expr_t *expr) {
+    // TODO
+    return parse_expr_primary(state, expr);
+}
+
+// <expr-additive> = <expr-unary> | <expr-unary> + <expr-additive>
+static bool parse_expr_additive(state_t *state, ast_expr_t *expr) {
+    if (!parse_expr_unary(state, expr)) {
+        printf("error: expected unary expr\n");
+        return false;
+    }
+
     if (!punctuator(state, Punctuator_Plus)) {
-        *expr = (ast_expr_t){.discrim = Ast_Expr_Constant, .str = constant};
+        return true;
+    }
+
+    ast_expr_t *lhs = malloc(sizeof(ast_expr_t));
+    *lhs = *expr;
+
+    ast_expr_t *rhs = malloc(sizeof(ast_expr_t));
+    if (!parse_expr_additive(state, rhs)) {
+        printf("error: expected additive expr\n");
+        return false;
+    }
+    advance(state);
+
+    *expr = (ast_expr_t){
+        .discrim = Ast_Expr_Addition,
+        .lhs = lhs,
+        .rhs = rhs,
+    };
+    return true;
+}
+
+// <expr-multiplicative> = <expr-additive> | <expr-additive> * <multiplicative>
+static bool parse_expr_multiplicative(state_t *state, ast_expr_t *expr) {
+    if (!parse_expr_unary(state, expr)) {
+        printf("error: expected unary expr\n");
+        return false;
+    }
+
+    if (!punctuator(state, Punctuator_Asterisk)) {
         return true;
     }
     advance(state);
 
+    ast_expr_t *lhs = malloc(sizeof(ast_expr_t));
+    *lhs = *expr;
+
     ast_expr_t *rhs = malloc(sizeof(ast_expr_t));
-    if (!parse_expr(state, rhs)) {
-        printf("error: expected expr\n");
+    if (!parse_expr_additive(state, rhs)) {
+        printf("error: expected additive expr\n");
         return false;
     }
 
-    *expr =
-        (ast_expr_t){.discrim = Ast_Expr_Addition, .str = constant, .rhs = rhs};
-
+    *expr = (ast_expr_t){
+        .discrim = Ast_Expr_Multiplication,
+        .lhs = lhs,
+        .rhs = rhs,
+    };
     return true;
+}
+
+// <expr> ::= <expr-multiplicative>
+static bool parse_expr(state_t *state, ast_expr_t *expr) {
+    return parse_expr_multiplicative(state, expr);
 }
 
 // <statement> ::= "return" <expr> ";"

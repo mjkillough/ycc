@@ -4,9 +4,17 @@ typedef struct ast_expr_t {
     enum {
         Ast_Expr_Constant,
         Ast_Expr_Addition,
+        Ast_Expr_Multiplication,
     } discrim;
-    const char *str;
-    struct ast_expr_t *rhs;
+    union {
+        // Ast_Expr_Constant:
+        const char *str;
+        // Ast_Expr_Addition, Ast_Expr_Multiplication:
+        struct {
+            struct ast_expr_t *lhs;
+            struct ast_expr_t *rhs;
+        };
+    };
 } ast_expr_t;
 
 typedef struct {

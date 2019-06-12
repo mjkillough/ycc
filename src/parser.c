@@ -8,12 +8,13 @@
 
 typedef struct {
     const char *prog;
+    lexer_state_t lexer;
     token_t token;
 } state_t;
 
 static void advance(state_t *state) {
     // XXX error
-    lexer_next_token(&state->prog, &state->token);
+    lexer_next_token(&state->lexer, &state->token);
 }
 
 static bool keyword(state_t *state, token_keyword_t keyword) {
@@ -207,13 +208,15 @@ static bool parse_program(state_t *state, ast_program_t *program) {
 }
 
 bool parser_parse(const char *prog, ast_program_t *program) {
+    lexer_state_t lexer = lexer_new(prog);
     token_t token;
-    if (!lexer_next_token(&prog, &token)) {
+    if (!lexer_next_token(&lexer, &token)) {
         return false;
     }
 
     state_t state = {
         .prog = prog,
+        .lexer = lexer,
         .token = token,
     };
     if (!parse_program(&state, program)) {

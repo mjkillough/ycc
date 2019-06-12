@@ -54,7 +54,7 @@ static const char *punctuator_as_string(token_punctuator_t p) {
     }
 }
 
-static bool iswhitespace(char c) { return c == ' ' || c == '\t'; }
+static bool iswhitespace(char c) { return c == ' ' || c == '\t' || c == '\n'; }
 
 static bool isnondigit(char c) { return c == '_' || isalpha(c); }
 
@@ -62,16 +62,6 @@ static bool ispunctuation(char c) {
     return c == '(' || c == ')' || c == '{' || c == '}' || c == ';' ||
            c == '+' || '*';
 }
-
-typedef enum {
-    State_Initial,
-    // Parsing an identifier/keyword:
-    State_Word,
-    // Parsing an integer constant:
-    State_Constant,
-    // Parsing punctuation:
-    State_Punctuation,
-} state_t;
 
 void lexer_print_token(token_t tok) {
     switch (tok.discrim) {
@@ -92,131 +82,164 @@ void lexer_print_token(token_t tok) {
     }
 }
 
-bool lexer_next_token(const char **prog, token_t *next) {
-    const char *start = *prog;
-    state_t state = State_Initial;
+lexer_state_t lexer_new(const char *prog) {
+    return (lexer_state_t){
+        .prog = prog,
+        .unlexed = prog,
+
+        .line = 0,
+        .character = 0,
+    };
+}
+
+static void advance(lexer_state_t *state) {
+    char prev = state->unlexed[0];
+
+    state->unlexed++;
+    state->character++;
+
+    if (prev == '\n') {
+        state->line++;
+        state->character = 0;
+    }
+}
+
+static bool lexer_constant(lexer_state_t *state, token_t *next) {
+    const char *start = state->unlexed;
+    advance(state);
 
     while (true) {
-        char c = (*prog)[0];
+        char c = state->unlexed[0];
 
         if (c == '\0') {
             return false;
         }
 
-        switch (state) {
-        case State_Initial:
-            start = *prog;
+        if (isdigit(c)) {
+            advance(state);
+        } else {
+            size_t len = state->unlexed - start;
+            char *str = (char *)malloc(len);
+            strncpy(str, start, len);
 
-            if (iswhitespace(c)) {
-                (*prog)++;
-            } else if (isdigit(c)) {
-                (*prog)++;
-                state = State_Constant;
-            } else if (isnondigit(c)) {
-                (*prog)++;
-                state = State_Word;
-            } else if (ispunctuation(c)) {
-                state = State_Punctuation;
+            *next = (token_t){
+                .discrim = Token_Constant,
+                .str = str,
+            };
+            return true;
+        }
+    }
+}
+
+static bool lexer_identifier_or_keyword(lexer_state_t *state, token_t *next) {
+    const char *start = state->unlexed;
+    advance(state);
+
+    while (true) {
+        char c = state->unlexed[0];
+
+        if (c == '\0') {
+            return false;
+        }
+
+        if (isnondigit(c) || isdigit(c)) {
+            advance(state);
+        } else {
+            size_t len = state->unlexed - start;
+
+            token_keyword_t keyword;
+            if (lookup_keyword(start, len, &keyword)) {
+                *next = (token_t){
+                    .discrim = Token_Keyword,
+                    .keyword = keyword,
+                };
+                return true;
             } else {
-                printf("lexer: unexpected char: %c\n", c);
-                exit(-1);
-            }
-
-            break;
-
-        case State_Constant:
-            if (isdigit(c)) {
-                (*prog)++;
-            } else {
-                size_t len = *prog - start;
                 char *str = (char *)malloc(len);
                 strncpy(str, start, len);
 
                 *next = (token_t){
-                    .discrim = Token_Constant,
+                    .discrim = Token_Identifier,
                     .str = str,
                 };
                 return true;
             }
+        }
+    }
+}
 
-            break;
+static bool lexer_punctuation(lexer_state_t *state, token_t *next) {
+    char c = state->unlexed[0];
+    advance(state);
 
-        case State_Word:
-            if (isnondigit(c) || isdigit(c)) {
-                (*prog)++;
-            } else {
-                size_t len = *prog - start;
+    switch (c) {
+    case ';':
+        *next = (token_t){
+            .discrim = Token_Punctuator,
+            .punctuator = Punctuator_Semicolon,
+        };
+        return true;
+    case '+':
+        *next = (token_t){
+            .discrim = Token_Punctuator,
+            .punctuator = Punctuator_Plus,
+        };
+        return true;
+    case '*':
+        *next = (token_t){
+            .discrim = Token_Punctuator,
+            .punctuator = Punctuator_Asterisk,
+        };
+        return true;
+    case '{':
+        *next = (token_t){
+            .discrim = Token_Punctuator,
+            .punctuator = Punctuator_OpenBrace,
+        };
+        return true;
+    case '}':
+        *next = (token_t){
+            .discrim = Token_Punctuator,
+            .punctuator = Punctuator_CloseBrace,
+        };
+        return true;
+    case '(':
+        *next = (token_t){
+            .discrim = Token_Punctuator,
+            .punctuator = Punctuator_OpenParen,
+        };
+        return true;
+    case ')':
+        *next = (token_t){
+            .discrim = Token_Punctuator,
+            .punctuator = Punctuator_CloseParen,
+        };
+        return true;
+    default:
+        printf("lexer: unexpected punctuator: '%c'\n", c);
+        exit(-1);
+    }
+}
 
-                token_keyword_t keyword;
-                if (lookup_keyword(start, len, &keyword)) {
-                    *next = (token_t){
-                        .discrim = Token_Keyword,
-                        .keyword = keyword,
-                    };
-                    return true;
-                } else {
-                    char *str = (char *)malloc(len);
-                    strncpy(str, start, len);
+bool lexer_next_token(lexer_state_t *state, token_t *next) {
+    while (true) {
+        char c = state->unlexed[0];
 
-                    *next = (token_t){
-                        .discrim = Token_Identifier,
-                        .str = str,
-                    };
-                    return true;
-                }
-            }
-            break;
+        if (c == '\0') {
+            return false;
+        }
 
-        case State_Punctuation:
-            (*prog)++;
-
-            switch (c) {
-            case ';':
-                *next = (token_t){
-                    .discrim = Token_Punctuator,
-                    .punctuator = Punctuator_Semicolon,
-                };
-                return true;
-            case '+':
-                *next = (token_t){
-                    .discrim = Token_Punctuator,
-                    .punctuator = Punctuator_Plus,
-                };
-                return true;
-            case '*':
-                *next = (token_t){
-                    .discrim = Token_Punctuator,
-                    .punctuator = Punctuator_Asterisk,
-                };
-                return true;
-            case '{':
-                *next = (token_t){
-                    .discrim = Token_Punctuator,
-                    .punctuator = Punctuator_OpenBrace,
-                };
-                return true;
-            case '}':
-                *next = (token_t){
-                    .discrim = Token_Punctuator,
-                    .punctuator = Punctuator_CloseBrace,
-                };
-                return true;
-            case '(':
-                *next = (token_t){
-                    .discrim = Token_Punctuator,
-                    .punctuator = Punctuator_OpenParen,
-                };
-                return true;
-            case ')':
-                *next = (token_t){
-                    .discrim = Token_Punctuator,
-                    .punctuator = Punctuator_CloseParen,
-                };
-                return true;
-            default:
-                printf("lexer: unexpected punctuator: '%c'\n", c);
-                exit(-1);
-            }
+        if (iswhitespace(c)) {
+            advance(state);
+        } else if (isdigit(c)) {
+            return lexer_constant(state, next);
+        } else if (isnondigit(c)) {
+            return lexer_identifier_or_keyword(state, next);
+        } else if (ispunctuation(c)) {
+            return lexer_punctuation(state, next);
+        } else {
+            printf("lexer: unexpected char: %c\n", c);
+            return false;
         }
     }
 }

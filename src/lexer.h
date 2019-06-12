@@ -2,6 +2,14 @@
 
 #include <stdbool.h>
 
+typedef struct {
+    unsigned int line;
+    unsigned int character;
+
+    const char *start;
+    const char *end;
+} token_span_t;
+
 typedef enum {
     Token_Keyword,
     Token_Identifier,
@@ -27,7 +35,6 @@ typedef enum {
 
 typedef struct {
     token_discrim_t discrim;
-
     union {
         // Token_Keyword
         token_keyword_t keyword;
@@ -36,7 +43,19 @@ typedef struct {
         // Token_Punctuator
         token_punctuator_t punctuator;
     };
+    token_span_t span;
 } token_t;
 
+// TODO: Make this private
+typedef struct {
+    const char *prog;
+    const char *unlexed;
+
+    unsigned int line;
+    unsigned int character;
+} lexer_state_t;
+
+lexer_state_t lexer_new(const char *prog);
+bool lexer_next_token(lexer_state_t *state, token_t *next);
+
 void lexer_print_token(token_t tok);
-bool lexer_next_token(const char **prog, token_t *next);

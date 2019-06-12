@@ -104,6 +104,16 @@ static void advance(lexer_state_t *state) {
     }
 }
 
+static token_span_t span(lexer_state_t *state, const char *start,
+                         const char *end) {
+    return (token_span_t){
+        .start = start,
+        .end = end,
+        .line = state->line,
+        .character = state->character,
+    };
+}
+
 static bool lexer_constant(lexer_state_t *state, token_t *next) {
     const char *start = state->unlexed;
     advance(state);
@@ -122,10 +132,9 @@ static bool lexer_constant(lexer_state_t *state, token_t *next) {
             char *str = (char *)malloc(len);
             strncpy(str, start, len);
 
-            *next = (token_t){
-                .discrim = Token_Constant,
-                .str = str,
-            };
+            *next = (token_t){.discrim = Token_Constant,
+                              .str = str,
+                              .span = span(state, start, state->unlexed - 1)};
             return true;
         }
     }
@@ -158,10 +167,10 @@ static bool lexer_identifier_or_keyword(lexer_state_t *state, token_t *next) {
                 char *str = (char *)malloc(len);
                 strncpy(str, start, len);
 
-                *next = (token_t){
-                    .discrim = Token_Identifier,
-                    .str = str,
-                };
+                *next =
+                    (token_t){.discrim = Token_Identifier,
+                              .str = str,
+                              .span = span(state, start, state->unlexed - 1)};
                 return true;
             }
         }
@@ -169,51 +178,34 @@ static bool lexer_identifier_or_keyword(lexer_state_t *state, token_t *next) {
 }
 
 static bool lexer_punctuation(lexer_state_t *state, token_t *next) {
+    const char *start = state->unlexed;
     char c = state->unlexed[0];
     advance(state);
 
+    *next = (token_t){.discrim = Token_Punctuator,
+                      .span = span(state, start, start)};
+
     switch (c) {
     case ';':
-        *next = (token_t){
-            .discrim = Token_Punctuator,
-            .punctuator = Punctuator_Semicolon,
-        };
+        next->punctuator = Punctuator_Semicolon;
         return true;
     case '+':
-        *next = (token_t){
-            .discrim = Token_Punctuator,
-            .punctuator = Punctuator_Plus,
-        };
+        next->punctuator = Punctuator_Plus;
         return true;
     case '*':
-        *next = (token_t){
-            .discrim = Token_Punctuator,
-            .punctuator = Punctuator_Asterisk,
-        };
+        next->punctuator = Punctuator_Asterisk;
         return true;
     case '{':
-        *next = (token_t){
-            .discrim = Token_Punctuator,
-            .punctuator = Punctuator_OpenBrace,
-        };
+        next->punctuator = Punctuator_OpenBrace;
         return true;
     case '}':
-        *next = (token_t){
-            .discrim = Token_Punctuator,
-            .punctuator = Punctuator_CloseBrace,
-        };
+        next->punctuator = Punctuator_CloseBrace;
         return true;
     case '(':
-        *next = (token_t){
-            .discrim = Token_Punctuator,
-            .punctuator = Punctuator_OpenParen,
-        };
+        next->punctuator = Punctuator_OpenParen;
         return true;
     case ')':
-        *next = (token_t){
-            .discrim = Token_Punctuator,
-            .punctuator = Punctuator_CloseParen,
-        };
+        next->punctuator = Punctuator_CloseParen;
         return true;
     default:
         printf("lexer: unexpected punctuator: '%c'\n", c);

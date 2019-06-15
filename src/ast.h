@@ -7,14 +7,24 @@ typedef enum {
     Ast_BinOp_Division,
 } ast_binop_t;
 
+typedef enum {
+    Ast_UnOp_Negation,
+} ast_unop_t;
+
 typedef struct ast_expr_t {
     enum {
         Ast_Expr_Constant,
+        Ast_Expr_UnOp,
         Ast_Expr_BinOp,
     } discrim;
     union {
         // Ast_Expr_Constant:
         const char *str;
+        // Ast_Expr_UnOp:
+        struct {
+            ast_unop_t unop;
+            struct ast_expr_t *inner;
+        };
         // Ast_Expr_Addition, Ast_Expr_Multiplication:
         struct {
             ast_binop_t binop;

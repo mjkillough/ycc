@@ -64,8 +64,26 @@ parse_result_t parse_expr_primary(state_t *state, ast_expr_t *expr) {
 
 // <expr-unary> = - <expr-primary>
 parse_result_t parse_expr_unary(state_t *state, ast_expr_t *expr) {
-    // TODO
-    return parse_expr_primary(state, expr);
+    if (!punctuator(state, Punctuator_Minus)) {
+        return parse_expr_primary(state, expr);
+    }
+    advance(state);
+
+    parse_result_t result;
+    if (iserror(result = parse_expr_primary(state, expr))) {
+        return result;
+    }
+
+    ast_expr_t *inner = malloc(sizeof(ast_expr_t));
+    *inner = *expr;
+
+    *expr = (ast_expr_t){
+        .discrim = Ast_Expr_UnOp,
+        .unop = Ast_UnOp_Negation,
+        .inner = inner,
+    };
+
+    return ok();
 }
 
 struct binop {

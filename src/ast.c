@@ -29,6 +29,11 @@ void ast_print_expr(ast_expr_t expr) {
         ast_print_expr(*expr.rhs);
         printf(")");
         break;
+    case Ast_Expr_UnOp:
+        printf("Expr(Neg(");
+        ast_print_expr(*expr.inner);
+        printf("))");
+        break;
     }
 }
 

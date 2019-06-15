@@ -31,6 +31,10 @@ static bool gen_expr(FILE *f, ast_expr_t expr) {
             break;
         }
         break;
+    case Ast_Expr_UnOp:
+        gen_expr(f, *expr.inner);
+        fprintf(f, "neg %%eax\n");
+        break;
     }
     return true;
 }

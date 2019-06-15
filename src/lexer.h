@@ -25,10 +25,14 @@ typedef enum {
 
 typedef enum {
     Punctuator_Semicolon,
+
+    Punctuator_Equals,
+
     Punctuator_Plus,
     Punctuator_Minus,
     Punctuator_Asterisk,
     Punctuator_ForwardSlash,
+
     Punctuator_OpenParen,
     Punctuator_CloseParen,
     Punctuator_OpenBrace,

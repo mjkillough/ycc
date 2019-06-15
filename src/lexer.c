@@ -33,68 +33,9 @@ static const char *keyword_as_string(token_keyword_t keyword) {
     return "UNKNOWN_KEYWORD";
 }
 
-static const char *punctuator_as_string(token_punctuator_t p) {
-    switch (p) {
-    case Punctuator_OpenBrace:
-        return "{";
-    case Punctuator_CloseBrace:
-        return "}";
-    case Punctuator_OpenParen:
-        return "(";
-    case Punctuator_CloseParen:
-        return ")";
-    case Punctuator_Semicolon:
-        return ";";
-    case Punctuator_Plus:
-        return "+";
-    case Punctuator_Minus:
-        return "-";
-    case Punctuator_Asterisk:
-        return "*";
-    case Punctuator_ForwardSlash:
-        return "/";
-    default:
-        return "UNKNOWN";
-    }
-}
-
 static bool iswhitespace(char c) { return c == ' ' || c == '\t' || c == '\n'; }
 
 static bool isnondigit(char c) { return c == '_' || isalpha(c); }
-
-static bool ispunctuation(char c) {
-    return c == '(' || c == ')' || c == '{' || c == '}' || c == ';' ||
-           c == '+' || c == '-' || c == '*' || c == '/';
-}
-
-void lexer_print_token(token_t tok) {
-    switch (tok.discrim) {
-    case Token_Keyword:
-        printf("Token_Keyword    { .keyword = %s }\n",
-               keyword_as_string(tok.keyword));
-        break;
-    case Token_Identifier:
-        printf("Token_Identifier { .str = \"%s\" }\n", tok.str);
-        break;
-    case Token_Constant:
-        printf("Token_Constant   { .str = \"%s\" }\n", tok.str);
-        break;
-    case Token_Punctuator:
-        printf("Token_Punctuator { .punctuator = %s }\n",
-               punctuator_as_string(tok.punctuator));
-        break;
-    }
-}
-
-lexer_state_t lexer_new(const char *prog) {
-    return (lexer_state_t){
-        .prog = prog,
-        .unlexed = prog,
-
-        .line = 0,
-        .character = 0,
-    };
-}
 
 static void advance(lexer_state_t *state) {
     char prev = state->unlexed[0];
@@ -181,6 +122,38 @@ static bool lexer_identifier_or_keyword(lexer_state_t *state, token_t *next) {
     }
 }
 
+static bool ispunctuation(char c) {
+    return c == '(' || c == ')' || c == '{' || c == '}' || c == ';' ||
+           c == '+' || c == '-' || c == '*' || c == '/' || c == '=';
+}
+
+static const char *punctuator_as_string(token_punctuator_t p) {
+    switch (p) {
+    case Punctuator_Equals:
+        return "=";
+    case Punctuator_OpenBrace:
+        return "{";
+    case Punctuator_CloseBrace:
+        return "}";
+    case Punctuator_OpenParen:
+        return "(";
+    case Punctuator_CloseParen:
+        return ")";
+    case Punctuator_Semicolon:
+        return ";";
+    case Punctuator_Plus:
+        return "+";
+    case Punctuator_Minus:
+        return "-";
+    case Punctuator_Asterisk:
+        return "*";
+    case Punctuator_ForwardSlash:
+        return "/";
+    default:
+        return "UNKNOWN";
+    }
+}
+
 static bool lexer_punctuation(lexer_state_t *state, token_t *next) {
     const char *start = state->unlexed;
     char c = state->unlexed[0];
@@ -192,6 +165,9 @@ static bool lexer_punctuation(lexer_state_t *state, token_t *next) {
     switch (c) {
     case ';':
         next->punctuator = Punctuator_Semicolon;
+        return true;
+    case '=':
+        next->punctuator = Punctuator_Equals;
         return true;
     case '+':
         next->punctuator = Punctuator_Plus;
@@ -221,6 +197,35 @@ static bool lexer_punctuation(lexer_state_t *state, token_t *next) {
         printf("lexer: unexpected punctuator: '%c'\n", c);
         exit(-1);
     }
+}
+
+void lexer_print_token(token_t tok) {
+    switch (tok.discrim) {
+    case Token_Keyword:
+        printf("Token_Keyword    { .keyword = %s }\n",
+               keyword_as_string(tok.keyword));
+        break;
+    case Token_Identifier:
+        printf("Token_Identifier { .str = \"%s\" }\n", tok.str);
+        break;
+    case Token_Constant:
+        printf("Token_Constant   { .str = \"%s\" }\n", tok.str);
+        break;
+    case Token_Punctuator:
+        printf("Token_Punctuator { .punctuator = %s }\n",
+               punctuator_as_string(tok.punctuator));
+        break;
+    }
+}
+
+lexer_state_t lexer_new(const char *prog) {
+    return (lexer_state_t){
+        .prog = prog,
+        .unlexed = prog,
+
+        .line = 0,
+        .character = 0,
+    };
 }
 
 bool lexer_next_token(lexer_state_t *state, token_t *next) {

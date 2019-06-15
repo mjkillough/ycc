@@ -20,7 +20,7 @@ static const char *ast_print_expr_binop(ast_expr_t expr) {
 void ast_print_expr(ast_expr_t expr) {
     switch (expr.discrim) {
     case Ast_Expr_Constant:
-        printf("Expr(%s)", expr.str);
+        printf("%s", expr.str);
         break;
     case Ast_Expr_BinOp:
         printf("Expr(");

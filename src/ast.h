@@ -39,8 +39,14 @@ typedef struct {
 } ast_statement_t;
 
 typedef struct {
+    ast_statement_t *stmts;
+    size_t count;
+    size_t capacity;
+} ast_block_t;
+
+typedef struct {
     const char *name;
-    ast_statement_t statement;
+    ast_block_t block;
 } ast_function_t;
 
 typedef struct {
@@ -48,6 +54,6 @@ typedef struct {
 } ast_program_t;
 
 void ast_print_expr(ast_expr_t *expr);
-void ast_print_statement(ast_statement_t statment);
-void ast_print_function(ast_function_t func);
-void ast_print_program(ast_program_t prog);
+void ast_print_statement(ast_statement_t *statment);
+void ast_print_function(ast_function_t *func);
+void ast_print_program(ast_program_t *prog);

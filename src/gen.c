@@ -39,20 +39,25 @@ static bool gen_expr(FILE *f, ast_expr_t *expr) {
     return true;
 }
 
-static bool gen_statement(FILE *f, ast_statement_t stmt) {
-    gen_expr(f, stmt.expr);
+static bool gen_statement(FILE *f, ast_statement_t *stmt) {
+    gen_expr(f, stmt->expr);
     fprintf(f, "ret\n");
     return true;
 }
 
-static bool gen_function(FILE *f, ast_function_t func) {
-    fprintf(f, " .globl %s\n", func.name);
-    fprintf(f, "%s:\n", func.name);
-    return gen_statement(f, func.statement);
+static bool gen_block(FILE *f, ast_block_t *block) {
+    gen_statement(f, &block->stmts[0]);
+    return true;
 }
 
-static bool gen_program(FILE *f, ast_program_t prog) {
-    return gen_function(f, prog.function);
+static bool gen_function(FILE *f, ast_function_t *func) {
+    fprintf(f, " .globl %s\n", func->name);
+    fprintf(f, "%s:\n", func->name);
+    return gen_block(f, &func->block);
 }
 
-bool gen_generate(FILE *f, ast_program_t ast) { return gen_program(f, ast); }
+static bool gen_program(FILE *f, ast_program_t *prog) {
+    return gen_function(f, &prog->function);
+}
+
+bool gen_generate(FILE *f, ast_program_t ast) { return gen_program(f, &ast); }

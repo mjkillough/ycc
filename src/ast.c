@@ -37,20 +37,26 @@ void ast_print_expr(ast_expr_t *expr) {
     }
 }
 
-void ast_print_statement(ast_statement_t statment) {
+void ast_print_statement(ast_statement_t *statment) {
     printf("Statement(");
-    ast_print_expr(statment.expr);
+    ast_print_expr(statment->expr);
     printf(")");
 }
 
-void ast_print_function(ast_function_t func) {
-    printf("Function(name=%s, ", func.name);
-    ast_print_statement(func.statement);
+void ast_print_block(ast_block_t *block) {
+    printf("Block(");
+    ast_print_statement(&block->stmts[0]);
     printf(")");
 }
 
-void ast_print_program(ast_program_t prog) {
+void ast_print_function(ast_function_t *func) {
+    printf("Function(name=%s, ", func->name);
+    ast_print_block(&func->block);
+    printf(")");
+}
+
+void ast_print_program(ast_program_t *prog) {
     printf("Program(");
-    ast_print_function(prog.function);
+    ast_print_function(&prog->function);
     printf(")\n");
 }

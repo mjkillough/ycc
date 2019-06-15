@@ -27,7 +27,7 @@ int main() {
 
     printf("---\n\n");
     printf("AST:\n");
-    ast_print_program(program);
+    ast_print_program(&program);
 
     printf("---\n\n");
     printf("ASM:\n");

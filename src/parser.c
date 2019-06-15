@@ -46,6 +46,19 @@ static bool identifier(state_t *state, const char **str) {
     return false;
 }
 
+static void block_add_statement(ast_block_t *block, ast_statement_t stmt) {
+    if (block->capacity == 0) {
+        block->stmts = calloc(1, sizeof(ast_statement_t));
+        block->capacity = 1;
+    } else if (block->capacity - block->count == 0) {
+        block->capacity *= 2;
+        block->stmts =
+            realloc(block->stmts, block->capacity * sizeof(ast_statement_t));
+    }
+
+    block->stmts[block->count++] = stmt;
+}
+
 // <expr-primary> = <constant>
 parse_result_t parse_expr_primary(state_t *state, ast_expr_t *expr) {
     if (state->token.discrim != Token_Constant) {
@@ -221,7 +234,10 @@ parse_result_t parse_function(state_t *state, ast_function_t *function) {
     }
     advance(state);
 
-    *function = (ast_function_t){.name = name, .statement = statement};
+    ast_block_t block = {0};
+    block_add_statement(&block, statement);
+
+    *function = (ast_function_t){.name = name, .block = block};
 
     return ok();
 }

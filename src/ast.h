@@ -1,16 +1,21 @@
 #pragma once
 
+typedef enum {
+    Ast_BinOp_Addition,
+    Ast_BinOp_Multiplication,
+} ast_binop_t;
+
 typedef struct ast_expr_t {
     enum {
         Ast_Expr_Constant,
-        Ast_Expr_Addition,
-        Ast_Expr_Multiplication,
+        Ast_Expr_BinOp,
     } discrim;
     union {
         // Ast_Expr_Constant:
         const char *str;
         // Ast_Expr_Addition, Ast_Expr_Multiplication:
         struct {
+            ast_binop_t binop;
             struct ast_expr_t *lhs;
             struct ast_expr_t *rhs;
         };

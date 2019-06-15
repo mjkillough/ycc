@@ -9,9 +9,8 @@ static bool gen_expr(FILE *f, ast_expr_t expr) {
     case Ast_Expr_Constant:
         fprintf(f, "mov $%s, %%eax\n", expr.str);
         break;
-    case Ast_Expr_Addition:
-        gen_expr(f, *expr.rhs);
-        fprintf(f, "add $%s, %%eax\n", expr.str);
+    case Ast_Expr_BinOp:
+        // TODO
         break;
     }
     return true;

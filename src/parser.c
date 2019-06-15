@@ -68,62 +68,65 @@ parse_result_t parse_expr_unary(state_t *state, ast_expr_t *expr) {
     return parse_expr_primary(state, expr);
 }
 
-// <expr-multiplicative> =   <expr-unary>
-//                         | <expr-unary> { + <expr-unary> }
-parse_result_t parse_expr_multiplicative(state_t *state, ast_expr_t *expr) {
+struct binop {
+    token_punctuator_t punctuator;
+    ast_binop_t op;
+};
+
+parse_result_t parse_expr_binop(state_t *state, ast_expr_t *expr,
+                                struct binop ops[], size_t num_ops,
+                                parse_result_t (*parse_next)(state_t *,
+                                                             ast_expr_t *)) {
     parse_result_t result;
-    if (iserror(result = parse_expr_unary(state, expr))) {
+    if (iserror(result = parse_next(state, expr))) {
         return result;
     }
 
-    while (punctuator(state, Punctuator_Asterisk)) {
-        advance(state);
+    while (true) {
+        for (size_t i = 0; i < num_ops; i++) {
+            if (!punctuator(state, ops[i].punctuator)) {
+                return ok();
+            }
+            advance(state);
 
-        ast_expr_t *lhs = malloc(sizeof(ast_expr_t));
-        *lhs = *expr;
+            ast_expr_t *lhs = malloc(sizeof(ast_expr_t));
+            *lhs = *expr;
 
-        ast_expr_t *rhs = malloc(sizeof(ast_expr_t));
-        if (iserror(result = parse_expr_unary(state, rhs))) {
-            return result;
+            ast_expr_t *rhs = malloc(sizeof(ast_expr_t));
+            if (iserror(result = parse_next(state, rhs))) {
+                return result;
+            }
+
+            *expr = (ast_expr_t){
+                .discrim = Ast_Expr_BinOp,
+                .binop = ops[i].op,
+                .lhs = lhs,
+                .rhs = rhs,
+            };
         }
-
-        *expr = (ast_expr_t){
-            .discrim = Ast_Expr_Multiplication,
-            .lhs = lhs,
-            .rhs = rhs,
-        };
     }
 
     return ok();
 }
 
+// <expr-multiplicative> =   <expr-unary>
+//                         | <expr-unary> { + <expr-unary> }
+parse_result_t parse_expr_multiplicative(state_t *state, ast_expr_t *expr) {
+    struct binop ops[] = {
+        {Punctuator_Asterisk, Ast_BinOp_Multiplication},
+    };
+    return parse_expr_binop(state, expr, ops, sizeof(ops) / sizeof(ops[0]),
+                            parse_expr_unary);
+}
+
 // <expr-additive> =   <expr-multiplicative>
 //                   | <expr-multiplicative> { + <expr-multiplicative> }
 parse_result_t parse_expr_additive(state_t *state, ast_expr_t *expr) {
-    parse_result_t result;
-    if (iserror(result = parse_expr_multiplicative(state, expr))) {
-        return result;
-    }
-
-    while (punctuator(state, Punctuator_Plus)) {
-        advance(state);
-
-        ast_expr_t *lhs = malloc(sizeof(ast_expr_t));
-        *lhs = *expr;
-
-        ast_expr_t *rhs = malloc(sizeof(ast_expr_t));
-        if (iserror(result = parse_expr_multiplicative(state, rhs))) {
-            return result;
-        }
-
-        *expr = (ast_expr_t){
-            .discrim = Ast_Expr_Addition,
-            .lhs = lhs,
-            .rhs = rhs,
-        };
-    }
-
-    return ok();
+    struct binop ops[] = {
+        {Punctuator_Plus, Ast_BinOp_Addition},
+    };
+    return parse_expr_binop(state, expr, ops, sizeof(ops) / sizeof(ops[0]),
+                            parse_expr_multiplicative);
 }
 
 // <expr> ::= <expr-multiplicative>

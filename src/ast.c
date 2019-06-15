@@ -2,11 +2,11 @@
 
 #include "ast.h"
 
-static const char *ast_print_expr_op(ast_expr_t expr) {
-    switch (expr.discrim) {
-    case Ast_Expr_Addition:
+static const char *ast_print_expr_binop(ast_expr_t expr) {
+    switch (expr.binop) {
+    case Ast_BinOp_Addition:
         return "+";
-    case Ast_Expr_Multiplication:
+    case Ast_BinOp_Multiplication:
         return "*";
     default:
         return "UNKNOWN_OP";
@@ -18,11 +18,10 @@ void ast_print_expr(ast_expr_t expr) {
     case Ast_Expr_Constant:
         printf("Expr(%s)", expr.str);
         break;
-    case Ast_Expr_Addition:
-    case Ast_Expr_Multiplication:
+    case Ast_Expr_BinOp:
         printf("Expr(");
         ast_print_expr(*expr.lhs);
-        printf(" %s ", ast_print_expr_op(expr));
+        printf(" %s ", ast_print_expr_binop(expr));
         ast_print_expr(*expr.rhs);
         printf(")");
         break;

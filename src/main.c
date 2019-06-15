@@ -1,12 +1,13 @@
 #include <stdio.h>
 
 #include "ast.h"
+#include "diag.h"
 #include "gen.h"
 #include "lexer.h"
 #include "parser.h"
 
 int main() {
-    const char *prog = "int main()\n{\treturn 2 + 4 * 5;\n}\n";
+    const char *prog = "int main()\n{\n\treturn 2 + 4 * 5;\n}\n";
 
     // token_t token;
     // while (lexer_next_token(&prog, &token)) {
@@ -14,8 +15,9 @@ int main() {
     // }
 
     ast_program_t program;
-    if (!parser_parse(prog, &program)) {
-        printf("error parsing\n");
+    parse_result_t result = parser_parse(prog, &program);
+    if (result.kind == Parse_Result_Error) {
+        diag_print(prog, &result.diag);
         return -1;
     }
 

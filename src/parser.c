@@ -68,65 +68,67 @@ parse_result_t parse_expr_unary(state_t *state, ast_expr_t *expr) {
     return parse_expr_primary(state, expr);
 }
 
-// <expr-additive> = <expr-unary> | <expr-unary> + <expr-additive>
-parse_result_t parse_expr_additive(state_t *state, ast_expr_t *expr) {
-    parse_result_t result;
-    if (iserror(result = parse_expr_unary(state, expr))) {
-        return result;
-    }
-
-    if (!punctuator(state, Punctuator_Plus)) {
-        return ok();
-    }
-
-    ast_expr_t *lhs = malloc(sizeof(ast_expr_t));
-    *lhs = *expr;
-
-    ast_expr_t *rhs = malloc(sizeof(ast_expr_t));
-    if (iserror(result = parse_expr_additive(state, rhs))) {
-        return result;
-    }
-    advance(state);
-
-    *expr = (ast_expr_t){
-        .discrim = Ast_Expr_Addition,
-        .lhs = lhs,
-        .rhs = rhs,
-    };
-    return ok();
-}
-
-// <expr-multiplicative> = <expr-additive> | <expr-additive> * <multiplicative>
+// <expr-multiplicative> =   <expr-unary>
+//                         | <expr-unary> { + <expr-unary> }
 parse_result_t parse_expr_multiplicative(state_t *state, ast_expr_t *expr) {
     parse_result_t result;
     if (iserror(result = parse_expr_unary(state, expr))) {
         return result;
     }
 
-    if (!punctuator(state, Punctuator_Asterisk)) {
-        return ok();
+    while (punctuator(state, Punctuator_Asterisk)) {
+        advance(state);
+
+        ast_expr_t *lhs = malloc(sizeof(ast_expr_t));
+        *lhs = *expr;
+
+        ast_expr_t *rhs = malloc(sizeof(ast_expr_t));
+        if (iserror(result = parse_expr_unary(state, rhs))) {
+            return result;
+        }
+
+        *expr = (ast_expr_t){
+            .discrim = Ast_Expr_Multiplication,
+            .lhs = lhs,
+            .rhs = rhs,
+        };
     }
-    advance(state);
 
-    ast_expr_t *lhs = malloc(sizeof(ast_expr_t));
-    *lhs = *expr;
+    return ok();
+}
 
-    ast_expr_t *rhs = malloc(sizeof(ast_expr_t));
-    if (iserror(result = parse_expr_additive(state, rhs))) {
+// <expr-additive> =   <expr-multiplicative>
+//                   | <expr-multiplicative> { + <expr-multiplicative> }
+parse_result_t parse_expr_additive(state_t *state, ast_expr_t *expr) {
+    parse_result_t result;
+    if (iserror(result = parse_expr_multiplicative(state, expr))) {
         return result;
     }
 
-    *expr = (ast_expr_t){
-        .discrim = Ast_Expr_Multiplication,
-        .lhs = lhs,
-        .rhs = rhs,
-    };
+    while (punctuator(state, Punctuator_Plus)) {
+        advance(state);
+
+        ast_expr_t *lhs = malloc(sizeof(ast_expr_t));
+        *lhs = *expr;
+
+        ast_expr_t *rhs = malloc(sizeof(ast_expr_t));
+        if (iserror(result = parse_expr_multiplicative(state, rhs))) {
+            return result;
+        }
+
+        *expr = (ast_expr_t){
+            .discrim = Ast_Expr_Addition,
+            .lhs = lhs,
+            .rhs = rhs,
+        };
+    }
+
     return ok();
 }
 
 // <expr> ::= <expr-multiplicative>
 parse_result_t parse_expr(state_t *state, ast_expr_t *expr) {
-    return parse_expr_multiplicative(state, expr);
+    return parse_expr_additive(state, expr);
 }
 
 // <statement> ::= "return" <expr> ";"

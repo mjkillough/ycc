@@ -114,6 +114,7 @@ parse_result_t parse_expr_binop(state_t *state, ast_expr_t *expr,
 parse_result_t parse_expr_multiplicative(state_t *state, ast_expr_t *expr) {
     struct binop ops[] = {
         {Punctuator_Asterisk, Ast_BinOp_Multiplication},
+        {Punctuator_ForwardSlash, Ast_BinOp_Division},
     };
     return parse_expr_binop(state, expr, ops, sizeof(ops) / sizeof(ops[0]),
                             parse_expr_unary);
@@ -124,6 +125,7 @@ parse_result_t parse_expr_multiplicative(state_t *state, ast_expr_t *expr) {
 parse_result_t parse_expr_additive(state_t *state, ast_expr_t *expr) {
     struct binop ops[] = {
         {Punctuator_Plus, Ast_BinOp_Addition},
+        {Punctuator_Minus, Ast_BinOp_Subtraction},
     };
     return parse_expr_binop(state, expr, ops, sizeof(ops) / sizeof(ops[0]),
                             parse_expr_multiplicative);

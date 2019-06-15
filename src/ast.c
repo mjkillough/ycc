@@ -6,8 +6,12 @@ static const char *ast_print_expr_binop(ast_expr_t expr) {
     switch (expr.binop) {
     case Ast_BinOp_Addition:
         return "+";
+    case Ast_BinOp_Subtraction:
+        return "-";
     case Ast_BinOp_Multiplication:
         return "*";
+    case Ast_BinOp_Division:
+        return "/";
     default:
         return "UNKNOWN_OP";
     }

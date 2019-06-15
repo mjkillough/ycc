@@ -19,8 +19,15 @@ static bool gen_expr(FILE *f, ast_expr_t expr) {
         case Ast_BinOp_Addition:
             fprintf(f, "add %%ecx, %%eax\n");
             break;
+        case Ast_BinOp_Subtraction:
+            fprintf(f, "sub %%ecx, %%eax\n");
+            break;
         case Ast_BinOp_Multiplication:
             fprintf(f, "imul %%ecx, %%eax\n");
+            break;
+        case Ast_BinOp_Division:
+            fprintf(f, "mov $0, %%edx\n");
+            fprintf(f, "idiv %%ecx\n");
             break;
         }
         break;

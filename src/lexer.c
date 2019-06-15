@@ -47,8 +47,12 @@ static const char *punctuator_as_string(token_punctuator_t p) {
         return ";";
     case Punctuator_Plus:
         return "+";
+    case Punctuator_Minus:
+        return "-";
     case Punctuator_Asterisk:
         return "*";
+    case Punctuator_ForwardSlash:
+        return "/";
     default:
         return "UNKNOWN";
     }
@@ -60,7 +64,7 @@ static bool isnondigit(char c) { return c == '_' || isalpha(c); }
 
 static bool ispunctuation(char c) {
     return c == '(' || c == ')' || c == '{' || c == '}' || c == ';' ||
-           c == '+' || '*';
+           c == '+' || c == '-' || c == '*' || c == '/';
 }
 
 void lexer_print_token(token_t tok) {
@@ -192,8 +196,14 @@ static bool lexer_punctuation(lexer_state_t *state, token_t *next) {
     case '+':
         next->punctuator = Punctuator_Plus;
         return true;
+    case '-':
+        next->punctuator = Punctuator_Minus;
+        return true;
     case '*':
         next->punctuator = Punctuator_Asterisk;
+        return true;
+    case '/':
+        next->punctuator = Punctuator_ForwardSlash;
         return true;
     case '{':
         next->punctuator = Punctuator_OpenBrace;

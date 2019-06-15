@@ -2,7 +2,9 @@
 
 typedef enum {
     Ast_BinOp_Addition,
+    Ast_BinOp_Subtraction,
     Ast_BinOp_Multiplication,
+    Ast_BinOp_Division,
 } ast_binop_t;
 
 typedef struct ast_expr_t {

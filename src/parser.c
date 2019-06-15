@@ -83,27 +83,32 @@ parse_result_t parse_expr_binop(state_t *state, ast_expr_t *expr,
     }
 
     while (true) {
+        struct binop *op = NULL;
         for (size_t i = 0; i < num_ops; i++) {
-            if (!punctuator(state, ops[i].punctuator)) {
-                return ok();
+            if (punctuator(state, ops[i].punctuator)) {
+                advance(state);
+                op = &ops[i];
             }
-            advance(state);
-
-            ast_expr_t *lhs = malloc(sizeof(ast_expr_t));
-            *lhs = *expr;
-
-            ast_expr_t *rhs = malloc(sizeof(ast_expr_t));
-            if (iserror(result = parse_next(state, rhs))) {
-                return result;
-            }
-
-            *expr = (ast_expr_t){
-                .discrim = Ast_Expr_BinOp,
-                .binop = ops[i].op,
-                .lhs = lhs,
-                .rhs = rhs,
-            };
         }
+
+        if (op == NULL) {
+            return ok();
+        }
+
+        ast_expr_t *lhs = malloc(sizeof(ast_expr_t));
+        *lhs = *expr;
+
+        ast_expr_t *rhs = malloc(sizeof(ast_expr_t));
+        if (iserror(result = parse_next(state, rhs))) {
+            return result;
+        }
+
+        *expr = (ast_expr_t){
+            .discrim = Ast_Expr_BinOp,
+            .binop = op->op,
+            .lhs = lhs,
+            .rhs = rhs,
+        };
     }
 
     return ok();

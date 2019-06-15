@@ -174,23 +174,52 @@ parse_result_t parse_expr(state_t *state, ast_expr_t *expr) {
 
 // <statement> ::= "return" <expr> ";"
 parse_result_t parse_statement(state_t *state, ast_statement_t *statement) {
-    if (!keyword(state, Keyword_return)) {
-        return error(state, "expected keyword return");
-    }
-    advance(state);
+    if (keyword(state, Keyword_return)) {
+        advance(state);
 
-    ast_expr_t *expr = (ast_expr_t *)malloc(sizeof(ast_expr_t));
-    parse_result_t result;
-    if (iserror(result = parse_expr(state, expr))) {
-        return result;
+        ast_expr_t *expr = (ast_expr_t *)malloc(sizeof(ast_expr_t));
+        parse_result_t result;
+        if (iserror(result = parse_expr(state, expr))) {
+            return result;
+        }
+
+        *statement = (ast_statement_t){
+            .kind = Ast_Statement_Return,
+            .expr = expr,
+        };
+    } else if (keyword(state, Keyword_int)) {
+        advance(state);
+
+        const char *ident;
+        if (!identifier(state, &ident)) {
+            return error(state, "expected identifier");
+        }
+        advance(state);
+
+        if (!punctuator(state, Punctuator_Equals)) {
+            return error(state, "expected =");
+        }
+        advance(state);
+
+        ast_expr_t *expr = (ast_expr_t *)malloc(sizeof(ast_expr_t));
+        parse_result_t result;
+        if (iserror(result = parse_expr(state, expr))) {
+            return result;
+        }
+
+        *statement = (ast_statement_t){
+            .kind = Ast_Statement_Decl,
+            .identifier = ident,
+            .expr = expr,
+        };
+    } else {
+        return error(state, "expected statement");
     }
 
     if (!punctuator(state, Punctuator_Semicolon)) {
         return error(state, "expected semicolon");
     }
     advance(state);
-
-    *statement = (ast_statement_t){.expr = expr};
 
     return ok();
 }

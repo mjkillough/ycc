@@ -106,6 +106,7 @@ static bool lexer_identifier_or_keyword(lexer_state_t *state, token_t *next) {
                 *next = (token_t){
                     .discrim = Token_Keyword,
                     .keyword = keyword,
+                    .span = span(state, start, state->unlexed - 1),
                 };
                 return true;
             } else {

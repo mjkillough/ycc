@@ -35,6 +35,13 @@ typedef struct ast_expr_t {
 } ast_expr_t;
 
 typedef struct {
+    enum {
+        Ast_Statement_Return,
+        Ast_Statement_Decl,
+    } kind;
+    // Ast_Statement_Decl:
+    const char *identifier;
+    // Ast_Statement_Return, Ast_Statement_Decl
     ast_expr_t *expr;
 } ast_statement_t;
 

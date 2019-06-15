@@ -37,16 +37,29 @@ void ast_print_expr(ast_expr_t *expr) {
     }
 }
 
-void ast_print_statement(ast_statement_t *statment) {
+void ast_print_statement(ast_statement_t *stmt) {
     printf("Statement(");
-    ast_print_expr(statment->expr);
+
+    switch (stmt->kind) {
+    case Ast_Statement_Return:
+        printf("Return(");
+        ast_print_expr(stmt->expr);
+        printf(")");
+        break;
+    case Ast_Statement_Decl:
+        printf("Decl(int, %s, ", stmt->identifier);
+        ast_print_expr(stmt->expr);
+        printf(")");
+        break;
+    }
+
     printf(")");
 }
 
 void ast_print_block(ast_block_t *block) {
     printf("Block(");
     for (size_t i = 0; i < block->count; i++) {
-        ast_print_statement(&block->stmts[0]);
+        ast_print_statement(&block->stmts[i]);
 
         if (i < block->count - 1) {
             printf(", ");

@@ -195,7 +195,28 @@ parse_result_t parse_statement(state_t *state, ast_statement_t *statement) {
     return ok();
 }
 
-// <function> ::= "int" <id> "(" ")" "{" <statement> "}"
+// <block> ::= { <statement> }
+parse_result_t parse_block(state_t *state, ast_block_t *block) {
+    if (!punctuator(state, Punctuator_OpenBrace)) {
+        return error(state, "expected opening brace");
+    }
+    advance(state);
+
+    while (!punctuator(state, Punctuator_CloseBrace)) {
+        ast_statement_t statement = {0};
+        parse_result_t result = {0};
+        if (iserror(result = parse_statement(state, &statement))) {
+            return result;
+        }
+
+        block_add_statement(block, statement);
+    }
+    advance(state);
+
+    return ok();
+}
+
+// <function> ::= "int" <id> "(" ")" "{" <block> "}"
 parse_result_t parse_function(state_t *state, ast_function_t *function) {
     if (!keyword(state, Keyword_int)) {
         return error(state, "expected keyword int");
@@ -218,24 +239,11 @@ parse_result_t parse_function(state_t *state, ast_function_t *function) {
     }
     advance(state);
 
-    if (!punctuator(state, Punctuator_OpenBrace)) {
-        return error(state, "expected opening brace");
-    }
-    advance(state);
-
-    ast_statement_t statement;
-    parse_result_t result;
-    if (iserror(result = parse_statement(state, &statement))) {
+    ast_block_t block = {0};
+    parse_result_t result = {0};
+    if (iserror(result = parse_block(state, &block))) {
         return result;
     }
-
-    if (!punctuator(state, Punctuator_CloseBrace)) {
-        return error(state, "expected closing brace");
-    }
-    advance(state);
-
-    ast_block_t block = {0};
-    block_add_statement(&block, statement);
 
     *function = (ast_function_t){.name = name, .block = block};
 

@@ -45,7 +45,13 @@ void ast_print_statement(ast_statement_t *statment) {
 
 void ast_print_block(ast_block_t *block) {
     printf("Block(");
-    ast_print_statement(&block->stmts[0]);
+    for (size_t i = 0; i < block->count; i++) {
+        ast_print_statement(&block->stmts[0]);
+
+        if (i < block->count - 1) {
+            printf(", ");
+        }
+    }
     printf(")");
 }
 

@@ -166,9 +166,9 @@ parse_result_t parse_statement(state_t *state, ast_statement_t *statement) {
     }
     advance(state);
 
-    ast_expr_t expr;
+    ast_expr_t *expr = (ast_expr_t *)malloc(sizeof(ast_expr_t));
     parse_result_t result;
-    if (iserror(result = parse_expr(state, &expr))) {
+    if (iserror(result = parse_expr(state, expr))) {
         return result;
     }
 

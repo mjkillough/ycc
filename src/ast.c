@@ -2,8 +2,8 @@
 
 #include "ast.h"
 
-static const char *ast_print_expr_binop(ast_expr_t expr) {
-    switch (expr.binop) {
+static const char *ast_print_expr_binop(ast_expr_t *expr) {
+    switch (expr->binop) {
     case Ast_BinOp_Addition:
         return "+";
     case Ast_BinOp_Subtraction:
@@ -17,21 +17,21 @@ static const char *ast_print_expr_binop(ast_expr_t expr) {
     }
 }
 
-void ast_print_expr(ast_expr_t expr) {
-    switch (expr.discrim) {
+void ast_print_expr(ast_expr_t *expr) {
+    switch (expr->discrim) {
     case Ast_Expr_Constant:
-        printf("%s", expr.str);
+        printf("%s", expr->str);
         break;
     case Ast_Expr_BinOp:
         printf("Expr(");
-        ast_print_expr(*expr.lhs);
+        ast_print_expr(expr->lhs);
         printf(" %s ", ast_print_expr_binop(expr));
-        ast_print_expr(*expr.rhs);
+        ast_print_expr(expr->rhs);
         printf(")");
         break;
     case Ast_Expr_UnOp:
         printf("Expr(Neg(");
-        ast_print_expr(*expr.inner);
+        ast_print_expr(expr->inner);
         printf("))");
         break;
     }

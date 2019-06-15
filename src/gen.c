@@ -4,18 +4,18 @@
 #include "ast.h"
 #include "gen.h"
 
-static bool gen_expr(FILE *f, ast_expr_t expr) {
-    switch (expr.discrim) {
+static bool gen_expr(FILE *f, ast_expr_t *expr) {
+    switch (expr->discrim) {
     case Ast_Expr_Constant:
-        fprintf(f, "mov $%s, %%eax\n", expr.str);
+        fprintf(f, "mov $%s, %%eax\n", expr->str);
         break;
     case Ast_Expr_BinOp:
-        gen_expr(f, *expr.rhs);
+        gen_expr(f, expr->rhs);
         fprintf(f, "push %%eax\n");
-        gen_expr(f, *expr.lhs);
+        gen_expr(f, expr->lhs);
         fprintf(f, "pop %%ecx\n");
 
-        switch (expr.binop) {
+        switch (expr->binop) {
         case Ast_BinOp_Addition:
             fprintf(f, "add %%ecx, %%eax\n");
             break;
@@ -32,7 +32,7 @@ static bool gen_expr(FILE *f, ast_expr_t expr) {
         }
         break;
     case Ast_Expr_UnOp:
-        gen_expr(f, *expr.inner);
+        gen_expr(f, expr->inner);
         fprintf(f, "neg %%eax\n");
         break;
     }

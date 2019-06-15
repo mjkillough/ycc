@@ -10,7 +10,19 @@ static bool gen_expr(FILE *f, ast_expr_t expr) {
         fprintf(f, "mov $%s, %%eax\n", expr.str);
         break;
     case Ast_Expr_BinOp:
-        // TODO
+        gen_expr(f, *expr.rhs);
+        fprintf(f, "push %%eax\n");
+        gen_expr(f, *expr.lhs);
+        fprintf(f, "pop %%ecx\n");
+
+        switch (expr.binop) {
+        case Ast_BinOp_Addition:
+            fprintf(f, "add %%ecx, %%eax\n");
+            break;
+        case Ast_BinOp_Multiplication:
+            fprintf(f, "imul %%ecx, %%eax\n");
+            break;
+        }
         break;
     }
     return true;

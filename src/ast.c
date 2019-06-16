@@ -63,7 +63,7 @@ void ast_print_expr(ast_expr_t *expr) {
         break;
     case Ast_Expr_UnOp:
         printf("Expr(Neg(");
-        ast_print_expr(expr->inner);
+        ast_print_expr(expr->lhs);
         printf("))");
         break;
     case Ast_Expr_AssignOp:

@@ -98,7 +98,7 @@ parse_result_t parse_expr_unary(state_t *state, ast_expr_t *expr) {
     *expr = (ast_expr_t){
         .discrim = Ast_Expr_UnOp,
         .unop = Ast_UnOp_Negation,
-        .inner = inner,
+        .lhs = inner,
     };
 
     return ok();

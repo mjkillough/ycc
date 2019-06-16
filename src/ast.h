@@ -38,16 +38,13 @@ typedef struct ast_expr_t {
         // Ast_Expr_Constant, Ast_Expr_Var:
         const char *str;
         // Ast_Expr_UnOp:
-        struct {
-            ast_unop_t unop;
-            struct ast_expr_t *inner;
-        };
+        ast_unop_t unop;
         // Ast_Expr_Binop:
         ast_binop_t binop;
         // Ast_Expr_AssignOp:
         ast_assignop_t assignop;
     };
-    // Ast_Expr_Binop, Ast_Expr_Assign:
+    // Ast_Expr_UnOp, Ast_Expr_Binop, Ast_Expr_Assign:
     struct ast_expr_t *lhs, *rhs;
 } ast_expr_t;
 

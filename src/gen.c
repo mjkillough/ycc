@@ -78,7 +78,7 @@ static bool gen_expr(FILE *f, state_t *state, ast_expr_t *expr) {
         }
         break;
     case Ast_Expr_UnOp:
-        gen_expr(f, state, expr->inner);
+        gen_expr(f, state, expr->lhs);
         fprintf(f, "neg %%eax\n");
         break;
     case Ast_Expr_AssignOp:

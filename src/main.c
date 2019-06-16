@@ -8,7 +8,7 @@
 
 int main() {
     const char *prog =
-        "int main()\n{\n\tint j = 11; j += 3 + 4; return j;\n}\n";
+        "int main()\n{\n\tint j = 11; j += 3 + - 4; return j;\n}\n";
 
     // lexer_state_t state = lexer_new(prog);
     // token_t token;

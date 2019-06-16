@@ -49,6 +49,8 @@ static void advance(lexer_state_t *state) {
     }
 }
 
+static char peek(lexer_state_t *state, size_t i) { return state->unlexed[i]; }
+
 static token_span_t span(lexer_state_t *state, const char *start,
                          const char *end) {
     return (token_span_t){
@@ -125,79 +127,72 @@ static bool lexer_identifier_or_keyword(lexer_state_t *state, token_t *next) {
 
 static bool ispunctuation(char c) {
     return c == '(' || c == ')' || c == '{' || c == '}' || c == ';' ||
-           c == '+' || c == '-' || c == '*' || c == '/' || c == '=';
+           c == '+' || c == '-' || c == '*' || c == '/' || c == '=' ||
+           c == '>' || c == '<' || c == '!';
 }
 
+static struct {
+    token_punctuator_t punctuator;
+    const char *str;
+    size_t len;
+} punctuators[] = {
+    {Punctuator_Equal, "==", 2},
+    {Punctuator_NotEqual, "!=", 2},
+    {Punctuator_GreaterThanEqual, ">=", 2},
+    {Punctuator_LessThanEqual, "<=", 2},
+
+    {Punctuator_Assign, "=", 1},
+    {Punctuator_GreaterThan, ">", 1},
+    {Punctuator_LessThan, "<", 1},
+    {Punctuator_OpenBrace, "{", 1},
+    {Punctuator_CloseBrace, "}", 1},
+    {Punctuator_OpenParen, "(", 1},
+    {Punctuator_CloseParen, ")", 1},
+    {Punctuator_Semicolon, ";", 1},
+    {Punctuator_Plus, "+", 1},
+    {Punctuator_Minus, "-", 1},
+    {Punctuator_Asterisk, "*", 1},
+    {Punctuator_ForwardSlash, "/", 1},
+};
+
 static const char *punctuator_as_string(token_punctuator_t p) {
-    switch (p) {
-    case Punctuator_Equals:
-        return "=";
-    case Punctuator_OpenBrace:
-        return "{";
-    case Punctuator_CloseBrace:
-        return "}";
-    case Punctuator_OpenParen:
-        return "(";
-    case Punctuator_CloseParen:
-        return ")";
-    case Punctuator_Semicolon:
-        return ";";
-    case Punctuator_Plus:
-        return "+";
-    case Punctuator_Minus:
-        return "-";
-    case Punctuator_Asterisk:
-        return "*";
-    case Punctuator_ForwardSlash:
-        return "/";
-    default:
-        return "UNKNOWN";
+    for (size_t i = 0; i < sizeof(punctuators) / sizeof(punctuators[0]); i++) {
+        if (punctuators[i].punctuator == p) {
+            return punctuators[i].str;
+        }
     }
+    return "UNKNOWN_PUNCTUATOR";
 }
 
 static bool lexer_punctuation(lexer_state_t *state, token_t *next) {
     const char *start = state->unlexed;
-    char c = state->unlexed[0];
-    advance(state);
 
     *next = (token_t){.discrim = Token_Punctuator,
                       .span = span(state, start, start)};
 
-    switch (c) {
-    case ';':
-        next->punctuator = Punctuator_Semicolon;
+    char c[2] = {peek(state, 0), peek(state, 1)};
+    for (size_t i = 0; i < sizeof(punctuators) / sizeof(punctuators[0]); i++) {
+        bool match = true;
+        for (size_t j = 0; j < punctuators[i].len; j++) {
+            if (c[j] != punctuators[i].str[j]) {
+                match = false;
+                break;
+            }
+        }
+
+        if (!match) {
+            continue;
+        }
+
+        next->punctuator = punctuators[i].punctuator;
+        for (size_t j = 0; j < punctuators[i].len; j++) {
+            advance(state);
+        }
+
         return true;
-    case '=':
-        next->punctuator = Punctuator_Equals;
-        return true;
-    case '+':
-        next->punctuator = Punctuator_Plus;
-        return true;
-    case '-':
-        next->punctuator = Punctuator_Minus;
-        return true;
-    case '*':
-        next->punctuator = Punctuator_Asterisk;
-        return true;
-    case '/':
-        next->punctuator = Punctuator_ForwardSlash;
-        return true;
-    case '{':
-        next->punctuator = Punctuator_OpenBrace;
-        return true;
-    case '}':
-        next->punctuator = Punctuator_CloseBrace;
-        return true;
-    case '(':
-        next->punctuator = Punctuator_OpenParen;
-        return true;
-    case ')':
-        next->punctuator = Punctuator_CloseParen;
-        return true;
-    default:
-        printf("lexer: unexpected punctuator: '%c'\n", c);
-        exit(-1);
     }
+    printf("lexer: unexpected punctuator: '%c'\n", c);
+    exit(-1);
 }
 
 void lexer_print_token(token_t tok) {

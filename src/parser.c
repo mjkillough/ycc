@@ -201,7 +201,7 @@ parse_result_t parse_statement(state_t *state, ast_statement_t *statement) {
         }
         advance(state);
 
-        if (!punctuator(state, Punctuator_Equals)) {
+        if (!punctuator(state, Punctuator_Assign)) {
             return error(state, "expected =");
         }
         advance(state);

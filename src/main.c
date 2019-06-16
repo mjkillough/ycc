@@ -10,10 +10,12 @@ int main() {
     const char *prog =
         "int main()\n{\n\tint j = 4 * 2; int k = 3 * 3; return j + k;\n}\n";
 
+    // lexer_state_t state = lexer_new(prog);
     // token_t token;
-    // while (lexer_next_token(&prog, &token)) {
+    // while (lexer_next_token(&state, &token)) {
     //     lexer_print_token(token);
     // }
+    // return 0;
 
     ast_program_t program;
     parse_result_t result = parser_parse(prog, &program);

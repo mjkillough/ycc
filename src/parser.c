@@ -192,8 +192,47 @@ parse_result_t parse_expr_equality(state_t *state, ast_expr_t *expr) {
                             parse_expr_relational);
 }
 
+parse_result_t parse_expr_assignment(state_t *state, ast_expr_t *expr) {
+    token_punctuator_t ops[] = {Punctuator_Assign};
+
+    parse_result_t result;
+    if (iserror(result = parse_expr_equality(state, expr))) {
+        return result;
+    }
+
+    while (true) {
+        token_punctuator_t *op = NULL;
+        for (size_t i = 0; i < sizeof(ops) / sizeof(ops[0]); i++) {
+            if (punctuator(state, ops[i])) {
+                advance(state);
+                op = &ops[i];
+            }
+        }
+
+        if (op == NULL) {
+            return ok();
+        }
+
+        ast_expr_t *lhs = malloc(sizeof(ast_expr_t));
+        *lhs = *expr;
+
+        ast_expr_t *rhs = malloc(sizeof(ast_expr_t));
+        if (iserror(result = parse_expr_equality(state, rhs))) {
+            return result;
+        }
+
+        *expr = (ast_expr_t){
+            .discrim = Ast_Expr_Assign,
+            .lhs = lhs,
+            .rhs = rhs,
+        };
+    }
+
+    return ok();
+}
+
 parse_result_t parse_expr(state_t *state, ast_expr_t *expr) {
-    return parse_expr_equality(state, expr);
+    return parse_expr_assignment(state, expr);
 }
 
 parse_result_t parse_block(state_t *state, ast_block_t *block);

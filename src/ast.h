@@ -24,6 +24,7 @@ typedef struct ast_expr_t {
         Ast_Expr_Var,
         Ast_Expr_UnOp,
         Ast_Expr_BinOp,
+        Ast_Expr_Assign,
     } discrim;
     union {
         // Ast_Expr_Constant, Ast_Expr_Var:
@@ -33,13 +34,13 @@ typedef struct ast_expr_t {
             ast_unop_t unop;
             struct ast_expr_t *inner;
         };
-        // Ast_Expr_Addition, Ast_Expr_Multiplication:
+        // Ast_Expr_Binop:
         struct {
             ast_binop_t binop;
-            struct ast_expr_t *lhs;
-            struct ast_expr_t *rhs;
         };
     };
+    // Ast_Expr_Binop, Ast_Expr_Assign:
+    struct ast_expr_t *lhs, *rhs;
 } ast_expr_t;
 
 struct ast_block_t;

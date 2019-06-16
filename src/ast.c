@@ -49,6 +49,13 @@ void ast_print_expr(ast_expr_t *expr) {
         ast_print_expr(expr->inner);
         printf("))");
         break;
+    case Ast_Expr_Assign:
+        printf("Assign(");
+        ast_print_expr(expr->lhs);
+        printf(", ");
+        ast_print_expr(expr->rhs);
+        printf(")");
+        break;
     }
 }
 

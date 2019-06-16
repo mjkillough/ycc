@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "ast.h"
 #include "gen.h"
@@ -80,6 +81,14 @@ static bool gen_expr(FILE *f, state_t *state, ast_expr_t *expr) {
         gen_expr(f, state, expr->inner);
         fprintf(f, "neg %%eax\n");
         break;
+    case Ast_Expr_Assign:
+        if (expr->lhs->discrim != Ast_Expr_Var) {
+            printf("error: can only assign to variables");
+            exit(-1);
+        }
+
+        gen_expr(f, state, expr->rhs);
+        fprintf(f, "mov %%eax, -%zu(%%ebp)\n", var_idx(state, expr->lhs->str));
     }
     return true;
 }

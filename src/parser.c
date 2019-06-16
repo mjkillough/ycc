@@ -300,7 +300,21 @@ parse_result_t parse_statement(state_t *state, ast_statement_t *statement) {
             .block = block,
         };
     } else {
-        return error(state, "expected statement");
+        ast_expr_t *expr = malloc(sizeof(ast_expr_t));
+        parse_result_t result = {0};
+        if (iserror(result = parse_expr(state, expr))) {
+            return result;
+        }
+
+        if (!punctuator(state, Punctuator_Semicolon)) {
+            return error(state, "expected semicolon");
+        }
+        advance(state);
+
+        *statement = (ast_statement_t){
+            .kind = Ast_Statement_Expr,
+            .expr = expr,
+        };
     }
 
     return ok();

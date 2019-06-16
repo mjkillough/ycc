@@ -82,6 +82,9 @@ void ast_print_statement(ast_statement_t *stmt) {
     case Ast_Statement_Block:
         ast_print_block(stmt->block);
         break;
+    case Ast_Statement_Expr:
+        ast_print_expr(stmt->expr);
+        break;
     }
 
     printf(")");

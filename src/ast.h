@@ -50,10 +50,12 @@ typedef struct ast_statement_t {
         Ast_Statement_Decl,
         Ast_Statement_If,
         Ast_Statement_Block,
+        Ast_Statement_Expr,
     } kind;
     // Ast_Statement_Decl:
     const char *identifier;
-    // Ast_Statement_Return, Ast_Statement_Decl, Ast_Statement_If:
+    // Ast_Statement_Return, Ast_Statement_Decl, Ast_Statement_Expr,
+    // Ast_Statement_If:
     ast_expr_t *expr;
     // Ast_Statement_If:
     struct ast_statement_t *arm1, *arm2;

@@ -120,6 +120,9 @@ static bool gen_statement(FILE *f, state_t *state, ast_statement_t *stmt) {
     case Ast_Statement_Block:
         gen_block(f, state, stmt->block);
         break;
+    case Ast_Statement_Expr:
+        gen_expr(f, state, stmt->expr);
+        break;
     }
     return true;
 }

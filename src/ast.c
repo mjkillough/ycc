@@ -52,6 +52,8 @@ void ast_print_expr(ast_expr_t *expr) {
     }
 }
 
+void ast_print_block(ast_block_t *block);
+
 void ast_print_statement(ast_statement_t *stmt) {
     printf("Statement(");
 
@@ -76,6 +78,10 @@ void ast_print_statement(ast_statement_t *stmt) {
             ast_print_statement(stmt->arm2);
         }
         printf(")");
+        break;
+    case Ast_Statement_Block:
+        ast_print_block(stmt->block);
+        break;
     }
 
     printf(")");

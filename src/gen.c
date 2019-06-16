@@ -84,6 +84,8 @@ static bool gen_expr(FILE *f, state_t *state, ast_expr_t *expr) {
     return true;
 }
 
+static bool gen_block(FILE *f, state_t *state, ast_block_t *block);
+
 static bool gen_statement(FILE *f, state_t *state, ast_statement_t *stmt) {
     switch (stmt->kind) {
     case Ast_Statement_Return:
@@ -114,6 +116,10 @@ static bool gen_statement(FILE *f, state_t *state, ast_statement_t *stmt) {
             gen_statement(f, state, stmt->arm1);
         }
         fprintf(f, "if_%zu:\n", end_label);
+        break;
+    case Ast_Statement_Block:
+        gen_block(f, state, stmt->block);
+        break;
     }
     return true;
 }

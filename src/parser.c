@@ -196,6 +196,8 @@ parse_result_t parse_expr(state_t *state, ast_expr_t *expr) {
     return parse_expr_equality(state, expr);
 }
 
+parse_result_t parse_block(state_t *state, ast_block_t *block);
+
 // <statement> ::= "return" <expr> ";"
 parse_result_t parse_statement(state_t *state, ast_statement_t *statement) {
     if (keyword(state, Keyword_return)) {
@@ -285,6 +287,17 @@ parse_result_t parse_statement(state_t *state, ast_statement_t *statement) {
             .expr = expr,
             .arm1 = stmt1,
             .arm2 = stmt2,
+        };
+    } else if (punctuator(state, Punctuator_OpenBrace)) {
+        ast_block_t *block = malloc(sizeof(ast_block_t));
+        parse_result_t result = {0};
+        if (iserror(result = parse_block(state, block))) {
+            return result;
+        }
+
+        *statement = (ast_statement_t){
+            .kind = Ast_Statement_Block,
+            .block = block,
         };
     } else {
         return error(state, "expected statement");

@@ -42,11 +42,14 @@ typedef struct ast_expr_t {
     };
 } ast_expr_t;
 
+struct ast_block_t;
+
 typedef struct ast_statement_t {
     enum {
         Ast_Statement_Return,
         Ast_Statement_Decl,
         Ast_Statement_If,
+        Ast_Statement_Block,
     } kind;
     // Ast_Statement_Decl:
     const char *identifier;
@@ -54,9 +57,11 @@ typedef struct ast_statement_t {
     ast_expr_t *expr;
     // Ast_Statement_If:
     struct ast_statement_t *arm1, *arm2;
+    // Ast_Statement_Block:
+    struct ast_block_t *block;
 } ast_statement_t;
 
-typedef struct {
+typedef struct ast_block_t {
     ast_statement_t *stmts;
     size_t count;
     size_t capacity;

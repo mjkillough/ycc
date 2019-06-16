@@ -142,6 +142,10 @@ static struct {
     {Punctuator_NotEqual, "!=", 2},
     {Punctuator_GreaterThanEqual, ">=", 2},
     {Punctuator_LessThanEqual, "<=", 2},
+    {Punctuator_PlusAssign, "+=", 2},
+    {Punctuator_MinusAssign, "-=", 2},
+    {Punctuator_AsteriskAssign, "*=", 2},
+    {Punctuator_ForwardSlashAssign, "/=", 2},
 
     {Punctuator_Assign, "=", 1},
     {Punctuator_GreaterThan, ">", 1},

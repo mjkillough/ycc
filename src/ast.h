@@ -18,13 +18,21 @@ typedef enum {
     Ast_UnOp_Negation,
 } ast_unop_t;
 
+typedef enum {
+    Ast_AssignOp_Assign,
+    Ast_AssignOp_Addition,
+    Ast_AssignOp_Subtraction,
+    Ast_AssignOp_Multiplication,
+    Ast_AssignOp_Division,
+} ast_assignop_t;
+
 typedef struct ast_expr_t {
     enum {
         Ast_Expr_Constant,
         Ast_Expr_Var,
         Ast_Expr_UnOp,
         Ast_Expr_BinOp,
-        Ast_Expr_Assign,
+        Ast_Expr_AssignOp,
     } discrim;
     union {
         // Ast_Expr_Constant, Ast_Expr_Var:
@@ -35,9 +43,9 @@ typedef struct ast_expr_t {
             struct ast_expr_t *inner;
         };
         // Ast_Expr_Binop:
-        struct {
-            ast_binop_t binop;
-        };
+        ast_binop_t binop;
+        // Ast_Expr_AssignOp:
+        ast_assignop_t assignop;
     };
     // Ast_Expr_Binop, Ast_Expr_Assign:
     struct ast_expr_t *lhs, *rhs;

@@ -81,14 +81,42 @@ static bool gen_expr(FILE *f, state_t *state, ast_expr_t *expr) {
         gen_expr(f, state, expr->inner);
         fprintf(f, "neg %%eax\n");
         break;
-    case Ast_Expr_Assign:
+    case Ast_Expr_AssignOp:
         if (expr->lhs->discrim != Ast_Expr_Var) {
             printf("error: can only assign to variables");
             exit(-1);
         }
 
         gen_expr(f, state, expr->rhs);
-        fprintf(f, "mov %%eax, -%zu(%%ebp)\n", var_idx(state, expr->lhs->str));
+
+        switch (expr->assignop) {
+        case Ast_AssignOp_Assign:
+            fprintf(f, "mov %%eax, ");
+            break;
+        case Ast_AssignOp_Addition:
+            fprintf(f, "add %%eax, ");
+            break;
+        case Ast_AssignOp_Subtraction:
+            fprintf(f, "sub %%eax, ");
+            break;
+        case Ast_AssignOp_Multiplication:
+            fprintf(f, "mov %%eax, %%ecx\n");
+            fprintf(f, "mov -%zu(%%ebp), %%eax\n",
+                    var_idx(state, expr->lhs->str));
+            fprintf(f, "imul %%ecx, %%eax\n");
+            fprintf(f, "mov %%eax, ");
+            break;
+        case Ast_AssignOp_Division:
+            fprintf(f, "mov %%eax, %%ecx\n");
+            fprintf(f, "mov $0, %%edx\n");
+            fprintf(f, "mov -%zu(%%ebp), %%eax\n",
+                    var_idx(state, expr->lhs->str));
+            fprintf(f, "idiv %%ecx\n");
+            fprintf(f, "mov %%eax, ");
+            break;
+        }
+
+        fprintf(f, "-%zu(%%ebp)\n", var_idx(state, expr->lhs->str));
     }
     return true;
 }

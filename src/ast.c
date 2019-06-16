@@ -29,6 +29,23 @@ static const char *ast_print_expr_binop(ast_expr_t *expr) {
     }
 }
 
+static const char *ast_print_expr_assignop(ast_expr_t *expr) {
+    switch (expr->assignop) {
+    case Ast_AssignOp_Assign:
+        return "=";
+    case Ast_AssignOp_Addition:
+        return "+=";
+    case Ast_AssignOp_Subtraction:
+        return "-=";
+    case Ast_AssignOp_Multiplication:
+        return "*=";
+    case Ast_AssignOp_Division:
+        return "/=";
+    default:
+        return "UNKNOWN_OP";
+    }
+}
+
 void ast_print_expr(ast_expr_t *expr) {
     switch (expr->discrim) {
     case Ast_Expr_Constant:
@@ -49,10 +66,10 @@ void ast_print_expr(ast_expr_t *expr) {
         ast_print_expr(expr->inner);
         printf("))");
         break;
-    case Ast_Expr_Assign:
+    case Ast_Expr_AssignOp:
         printf("Assign(");
         ast_print_expr(expr->lhs);
-        printf(", ");
+        printf(" %s ", ast_print_expr_assignop(expr));
         ast_print_expr(expr->rhs);
         printf(")");
         break;

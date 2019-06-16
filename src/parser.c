@@ -193,7 +193,16 @@ parse_result_t parse_expr_equality(state_t *state, ast_expr_t *expr) {
 }
 
 parse_result_t parse_expr_assignment(state_t *state, ast_expr_t *expr) {
-    token_punctuator_t ops[] = {Punctuator_Assign};
+    struct assignop {
+        token_punctuator_t punctuator;
+        ast_assignop_t assignop;
+    } ops[] = {
+        {Punctuator_Assign, Ast_AssignOp_Assign},
+        {Punctuator_PlusAssign, Ast_AssignOp_Addition},
+        {Punctuator_MinusAssign, Ast_AssignOp_Subtraction},
+        {Punctuator_AsteriskAssign, Ast_AssignOp_Multiplication},
+        {Punctuator_ForwardSlashAssign, Ast_AssignOp_Division},
+    };
 
     parse_result_t result;
     if (iserror(result = parse_expr_equality(state, expr))) {
@@ -201,9 +210,9 @@ parse_result_t parse_expr_assignment(state_t *state, ast_expr_t *expr) {
     }
 
     while (true) {
-        token_punctuator_t *op = NULL;
+        struct assignop *op = NULL;
         for (size_t i = 0; i < sizeof(ops) / sizeof(ops[0]); i++) {
-            if (punctuator(state, ops[i])) {
+            if (punctuator(state, ops[i].punctuator)) {
                 advance(state);
                 op = &ops[i];
             }
@@ -222,7 +231,8 @@ parse_result_t parse_expr_assignment(state_t *state, ast_expr_t *expr) {
         }
 
         *expr = (ast_expr_t){
-            .discrim = Ast_Expr_Assign,
+            .discrim = Ast_Expr_AssignOp,
+            .assignop = op->assignop,
             .lhs = lhs,
             .rhs = rhs,
         };

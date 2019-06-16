@@ -3,16 +3,22 @@
 
 #include "ast.h"
 #include "gen.h"
+#include "map.h"
 
-static bool gen_expr(FILE *f, ast_expr_t *expr) {
+typedef struct {
+    map_t *env;
+    size_t stack_idx;
+} state_t;
+
+static bool gen_expr(FILE *f, state_t *state, ast_expr_t *expr) {
     switch (expr->discrim) {
     case Ast_Expr_Constant:
         fprintf(f, "mov $%s, %%eax\n", expr->str);
         break;
     case Ast_Expr_BinOp:
-        gen_expr(f, expr->rhs);
+        gen_expr(f, state, expr->rhs);
         fprintf(f, "push %%eax\n");
-        gen_expr(f, expr->lhs);
+        gen_expr(f, state, expr->lhs);
         fprintf(f, "pop %%ecx\n");
 
         switch (expr->binop) {
@@ -32,28 +38,45 @@ static bool gen_expr(FILE *f, ast_expr_t *expr) {
         }
         break;
     case Ast_Expr_UnOp:
-        gen_expr(f, expr->inner);
+        gen_expr(f, state, expr->inner);
         fprintf(f, "neg %%eax\n");
         break;
     }
     return true;
 }
 
-static bool gen_statement(FILE *f, ast_statement_t *stmt) {
-    gen_expr(f, stmt->expr);
-    fprintf(f, "ret\n");
+static bool gen_statement(FILE *f, state_t *state, ast_statement_t *stmt) {
+    switch (stmt->kind) {
+    case Ast_Statement_Return:
+        gen_expr(f, state, stmt->expr);
+        fprintf(f, "ret\n");
+        break;
+    case Ast_Statement_Decl:
+        gen_expr(f, state, stmt->expr);
+        fprintf(f, "push %%eax\n");
+        map_insert(state->env, stmt->identifier, (void *)state->stack_idx);
+        state->stack_idx--;
+        break;
+    }
     return true;
 }
 
-static bool gen_block(FILE *f, ast_block_t *block) {
-    gen_statement(f, &block->stmts[0]);
+static bool gen_block(FILE *f, state_t *state, ast_block_t *block) {
+    for (size_t i = 0; i < block->count; i++) {
+        gen_statement(f, state, &block->stmts[i]);
+    }
     return true;
 }
 
 static bool gen_function(FILE *f, ast_function_t *func) {
+    state_t state = {
+        .env = map_new(),
+        .stack_idx = 0,
+    };
     fprintf(f, " .globl %s\n", func->name);
     fprintf(f, "%s:\n", func->name);
-    return gen_block(f, &func->block);
+    fprintf(f, "mov %%esp, %%ebp\n");
+    return gen_block(f, &state, &func->block);
 }
 
 static bool gen_program(FILE *f, ast_program_t *prog) {

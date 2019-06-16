@@ -109,10 +109,18 @@ void map_remove(map_t *m, const char *key) {
     }
 }
 
-void map_iter_values(map_t *m, void (*fn)(void *)) {
-    for (size_t i = 0; i < m->capacity; i++) {
-        if (m->entries[i].key != NULL && m->entries[i].key != TOMBSTONE) {
-            fn(m->entries[i].ptr);
-        }
+bool map_iter(map_t *m, map_entry_t **entry) {
+    if (*entry == NULL) {
+        *entry = m->entries;
+    } else {
+        (*entry)++;
     }
+    while (*entry != (m->entries + m->capacity)) {
+        if ((*entry)->key != NULL && (*entry)->key != TOMBSTONE) {
+            return true;
+        }
+        (*entry)++;
+    }
+    *entry = NULL;
+    return false;
 }

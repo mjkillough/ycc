@@ -7,8 +7,9 @@
 #include "parser.h"
 
 int main() {
-    const char *prog = "int main()\n{\n\tint j = 11; j += 3 + - 4; return "
-                       "j;\n} int foo() { return 4; }\n";
+    const char *prog =
+        "int main()\n{\n\tint j = 11; j += 3 + - 4; return "
+        "j;\n} int foo() { return 4; } int blah() { return 5; }\n";
 
     // lexer_state_t state = lexer_new(prog);
     // token_t token;

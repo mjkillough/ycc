@@ -135,5 +135,8 @@ void ast_print_function(ast_function_t *func) {
 }
 
 void ast_print_program(ast_program_t *prog) {
-    map_iter_values(prog->functions, (void (*)(void *))ast_print_function);
+    map_entry_t *entry = NULL;
+    while (map_iter(prog->functions, &entry)) {
+        ast_print_function(entry->ptr);
+    }
 }

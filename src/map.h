@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdbool.h>
+
 typedef struct {
     const char *key;
     void *ptr;
@@ -15,4 +17,4 @@ map_t *map_new();
 void map_insert(map_t *m, const char *key, void *ptr);
 void *map_get(map_t *m, const char *key);
 void map_remove(map_t *m, const char *key);
-void map_iter_values(map_t *m, void (*fn)(void *));
+bool map_iter(map_t *m, map_entry_t **entry);

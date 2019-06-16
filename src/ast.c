@@ -22,6 +22,9 @@ void ast_print_expr(ast_expr_t *expr) {
     case Ast_Expr_Constant:
         printf("%s", expr->str);
         break;
+    case Ast_Expr_Var:
+        printf("Var(%s)", expr->str);
+        break;
     case Ast_Expr_BinOp:
         printf("Expr(");
         ast_print_expr(expr->lhs);

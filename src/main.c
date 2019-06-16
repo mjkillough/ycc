@@ -7,7 +7,8 @@
 #include "parser.h"
 
 int main() {
-    const char *prog = "int main()\n{\n\tint j = 0 * 2; return 1 - - 2;\n}\n";
+    const char *prog =
+        "int main()\n{\n\tint j = 4 * 2; int k = 3 * 3; return j + k;\n}\n";
 
     // token_t token;
     // while (lexer_next_token(&prog, &token)) {

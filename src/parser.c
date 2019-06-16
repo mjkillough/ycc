@@ -61,16 +61,21 @@ static void block_add_statement(ast_block_t *block, ast_statement_t stmt) {
 
 // <expr-primary> = <constant>
 parse_result_t parse_expr_primary(state_t *state, ast_expr_t *expr) {
-    if (state->token.discrim != Token_Constant) {
-        return error(state, "expected integer");
+    if (state->token.discrim == Token_Constant) {
+        *expr = (ast_expr_t){
+            .discrim = Ast_Expr_Constant,
+            .str = state->token.str,
+        };
+        advance(state);
+    } else if (state->token.discrim == Token_Identifier) {
+        *expr = (ast_expr_t){
+            .discrim = Ast_Expr_Var,
+            .str = state->token.str,
+        };
+        advance(state);
+    } else {
+        return error(state, "expected primary expression");
     }
-
-    *expr = (ast_expr_t){
-        .discrim = Ast_Expr_Constant,
-        .str = state->token.str,
-    };
-
-    advance(state);
 
     return ok();
 }

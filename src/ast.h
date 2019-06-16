@@ -14,11 +14,12 @@ typedef enum {
 typedef struct ast_expr_t {
     enum {
         Ast_Expr_Constant,
+        Ast_Expr_Var,
         Ast_Expr_UnOp,
         Ast_Expr_BinOp,
     } discrim;
     union {
-        // Ast_Expr_Constant:
+        // Ast_Expr_Constant, Ast_Expr_Var:
         const char *str;
         // Ast_Expr_UnOp:
         struct {

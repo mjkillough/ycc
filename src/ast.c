@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "ast.h"
+#include "map.h"
 
 static const char *ast_print_expr_binop(ast_expr_t *expr) {
     switch (expr->binop) {
@@ -130,10 +131,9 @@ void ast_print_function(ast_function_t *func) {
     printf("Function(name=%s, ", func->name);
     ast_print_block(&func->block);
     printf(")");
+    printf("\n");
 }
 
 void ast_print_program(ast_program_t *prog) {
-    printf("Program(");
-    ast_print_function(&prog->function);
-    printf(")\n");
+    map_iter_values(prog->functions, (void (*)(void *))ast_print_function);
 }

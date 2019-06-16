@@ -4,12 +4,14 @@
 
 #include "ast.h"
 #include "lexer.h"
+#include "map.h"
 #include "parser.h"
 
 typedef struct {
     const char *prog;
     lexer_state_t lexer;
     token_t token;
+    bool eof;
 } state_t;
 
 static parse_result_t ok() { return (parse_result_t){.kind = Parse_Result_Ok}; }
@@ -24,9 +26,10 @@ static bool iserror(parse_result_t result) {
 }
 
 static void advance(state_t *state) {
-    // XXX error
-    lexer_next_token(&state->lexer, &state->token);
+    state->eof |= !lexer_next_token(&state->lexer, &state->token);
 }
+
+static bool eof(state_t *state) { return state->eof; }
 
 static bool keyword(state_t *state, token_keyword_t keyword) {
     return state->token.discrim == Token_Keyword &&
@@ -426,13 +429,19 @@ parse_result_t parse_function(state_t *state, ast_function_t *function) {
 
 // <program> ::= <function>
 parse_result_t parse_program(state_t *state, ast_program_t *program) {
-    ast_function_t function;
-    parse_result_t result;
-    if (iserror(result = parse_function(state, &function))) {
-        return result;
+    map_t *functions = map_new();
+
+    while (!eof(state)) {
+        ast_function_t *function = calloc(1, sizeof(ast_function_t));
+        parse_result_t result;
+        if (iserror(result = parse_function(state, function))) {
+            return result;
+        }
+
+        map_insert(functions, function->name, function);
     }
 
-    *program = (ast_program_t){.function = function};
+    *program = (ast_program_t){.functions = functions};
 
     return ok();
 }
@@ -449,6 +458,7 @@ parse_result_t parser_parse(const char *prog, ast_program_t *program) {
         .prog = prog,
         .lexer = lexer,
         .token = token,
+        .eof = false,
     };
     return parse_program(&state, program);
 }

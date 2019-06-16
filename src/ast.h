@@ -1,5 +1,7 @@
 #pragma once
 
+#include "map.h"
+
 typedef enum {
     Ast_BinOp_Addition,
     Ast_BinOp_Subtraction,
@@ -81,7 +83,7 @@ typedef struct {
 } ast_function_t;
 
 typedef struct {
-    ast_function_t function;
+    map_t *functions; // ast_function_t
 } ast_program_t;
 
 void ast_print_expr(ast_expr_t *expr);

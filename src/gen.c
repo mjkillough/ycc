@@ -184,7 +184,7 @@ static bool gen_function(FILE *f, ast_function_t *func) {
 }
 
 static bool gen_program(FILE *f, ast_program_t *prog) {
-    return gen_function(f, &prog->function);
+    return gen_function(f, map_get(prog->functions, "main"));
 }
 
 bool gen_generate(FILE *f, ast_program_t ast) { return gen_program(f, &ast); }

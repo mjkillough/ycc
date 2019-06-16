@@ -108,3 +108,11 @@ void map_remove(map_t *m, const char *key) {
         }
     }
 }
+
+void map_iter_values(map_t *m, void (*fn)(void *)) {
+    for (size_t i = 0; i < m->capacity; i++) {
+        if (m->entries[i].key != NULL && m->entries[i].key != TOMBSTONE) {
+            fn(m->entries[i].ptr);
+        }
+    }
+}

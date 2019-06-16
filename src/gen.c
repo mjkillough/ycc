@@ -42,6 +42,36 @@ static bool gen_expr(FILE *f, state_t *state, ast_expr_t *expr) {
             fprintf(f, "mov $0, %%edx\n");
             fprintf(f, "idiv %%ecx\n");
             break;
+        case Ast_BinOp_Equal:
+            fprintf(f, "cmp %%ecx, %%eax\n");
+            fprintf(f, "mov $0, %%eax\n");
+            fprintf(f, "sete %%al\n");
+            break;
+        case Ast_BinOp_NotEqual:
+            fprintf(f, "cmp %%ecx, %%eax\n");
+            fprintf(f, "mov $0, %%eax\n");
+            fprintf(f, "setne %%al\n");
+            break;
+        case Ast_BinOp_LessThan:
+            fprintf(f, "cmp %%ecx, %%eax\n");
+            fprintf(f, "mov $0, %%eax\n");
+            fprintf(f, "setl %%al\n");
+            break;
+        case Ast_BinOp_LessThanEqual:
+            fprintf(f, "cmp %%ecx, %%eax\n");
+            fprintf(f, "mov $0, %%eax\n");
+            fprintf(f, "setle %%al\n");
+            break;
+        case Ast_BinOp_GreatherThan:
+            fprintf(f, "cmp %%ecx, %%eax\n");
+            fprintf(f, "mov $0, %%eax\n");
+            fprintf(f, "setg %%al\n");
+            break;
+        case Ast_BinOp_GreaterThanEqual:
+            fprintf(f, "cmp %%ecx, %%eax\n");
+            fprintf(f, "mov $0, %%eax\n");
+            fprintf(f, "setge %%al\n");
+            break;
         }
         break;
     case Ast_Expr_UnOp:

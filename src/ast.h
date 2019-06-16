@@ -5,6 +5,13 @@ typedef enum {
     Ast_BinOp_Subtraction,
     Ast_BinOp_Multiplication,
     Ast_BinOp_Division,
+
+    Ast_BinOp_Equal,
+    Ast_BinOp_NotEqual,
+    Ast_BinOp_LessThan,
+    Ast_BinOp_LessThanEqual,
+    Ast_BinOp_GreatherThan,
+    Ast_BinOp_GreaterThanEqual,
 } ast_binop_t;
 
 typedef enum {

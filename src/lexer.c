@@ -167,9 +167,6 @@ static const char *punctuator_as_string(token_punctuator_t p) {
 static bool lexer_punctuation(lexer_state_t *state, token_t *next) {
     const char *start = state->unlexed;
 
-    *next = (token_t){.discrim = Token_Punctuator,
-                      .span = span(state, start, start)};
-
     char c[2] = {peek(state, 0), peek(state, 1)};
     for (size_t i = 0; i < sizeof(punctuators) / sizeof(punctuators[0]); i++) {
         bool match = true;
@@ -184,14 +181,18 @@ static bool lexer_punctuation(lexer_state_t *state, token_t *next) {
             continue;
         }
 
-        next->punctuator = punctuators[i].punctuator;
+        *next =
+            (token_t){.discrim = Token_Punctuator,
+                      .punctuator = punctuators[i].punctuator,
+                      .span = span(state, start, start + punctuators[i].len)};
+
         for (size_t j = 0; j < punctuators[i].len; j++) {
             advance(state);
         }
 
         return true;
     }
-    printf("lexer: unexpected punctuator: '%c'\n", c);
+    printf("lexer: unexpected punctuator\n");
     exit(-1);
 }
 

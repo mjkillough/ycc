@@ -12,6 +12,18 @@ static const char *ast_print_expr_binop(ast_expr_t *expr) {
         return "*";
     case Ast_BinOp_Division:
         return "/";
+    case Ast_BinOp_Equal:
+        return "==";
+    case Ast_BinOp_NotEqual:
+        return "!=";
+    case Ast_BinOp_LessThan:
+        return "<";
+    case Ast_BinOp_LessThanEqual:
+        return "<=";
+    case Ast_BinOp_GreatherThan:
+        return ">";
+    case Ast_BinOp_GreaterThanEqual:
+        return ">=";
     default:
         return "UNKNOWN_OP";
     }

@@ -172,9 +172,28 @@ parse_result_t parse_expr_additive(state_t *state, ast_expr_t *expr) {
                             parse_expr_multiplicative);
 }
 
-// <expr> ::= <expr-multiplicative>
+parse_result_t parse_expr_relational(state_t *state, ast_expr_t *expr) {
+    struct binop ops[] = {
+        {Punctuator_LessThan, Ast_BinOp_LessThan},
+        {Punctuator_LessThanEqual, Ast_BinOp_LessThanEqual},
+        {Punctuator_GreaterThan, Ast_BinOp_GreatherThan},
+        {Punctuator_GreaterThanEqual, Ast_BinOp_GreaterThanEqual},
+    };
+    return parse_expr_binop(state, expr, ops, sizeof(ops) / sizeof(ops[0]),
+                            parse_expr_additive);
+}
+
+parse_result_t parse_expr_equality(state_t *state, ast_expr_t *expr) {
+    struct binop ops[] = {
+        {Punctuator_Equal, Ast_BinOp_Equal},
+        {Punctuator_NotEqual, Ast_BinOp_NotEqual},
+    };
+    return parse_expr_binop(state, expr, ops, sizeof(ops) / sizeof(ops[0]),
+                            parse_expr_relational);
+}
+
 parse_result_t parse_expr(state_t *state, ast_expr_t *expr) {
-    return parse_expr_additive(state, expr);
+    return parse_expr_equality(state, expr);
 }
 
 // <statement> ::= "return" <expr> ";"

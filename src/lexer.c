@@ -12,6 +12,8 @@ static const struct {
 } keywords[] = {
     {Keyword_int, "int"},
     {Keyword_return, "return"},
+    {Keyword_if, "if"},
+    {Keyword_else, "else"},
 };
 
 static bool lookup_keyword(const char *str, size_t len, token_keyword_t *out) {

@@ -42,15 +42,18 @@ typedef struct ast_expr_t {
     };
 } ast_expr_t;
 
-typedef struct {
+typedef struct ast_statement_t {
     enum {
         Ast_Statement_Return,
         Ast_Statement_Decl,
+        Ast_Statement_If,
     } kind;
     // Ast_Statement_Decl:
     const char *identifier;
-    // Ast_Statement_Return, Ast_Statement_Decl
+    // Ast_Statement_Return, Ast_Statement_Decl, Ast_Statement_If:
     ast_expr_t *expr;
+    // Ast_Statement_If:
+    struct ast_statement_t *arm1, *arm2;
 } ast_statement_t;
 
 typedef struct {

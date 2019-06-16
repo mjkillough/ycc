@@ -211,6 +211,11 @@ parse_result_t parse_statement(state_t *state, ast_statement_t *statement) {
             .kind = Ast_Statement_Return,
             .expr = expr,
         };
+
+        if (!punctuator(state, Punctuator_Semicolon)) {
+            return error(state, "expected semicolon");
+        }
+        advance(state);
     } else if (keyword(state, Keyword_int)) {
         advance(state);
 
@@ -236,14 +241,54 @@ parse_result_t parse_statement(state_t *state, ast_statement_t *statement) {
             .identifier = ident,
             .expr = expr,
         };
+
+        if (!punctuator(state, Punctuator_Semicolon)) {
+            return error(state, "expected semicolon");
+        }
+        advance(state);
+    } else if (keyword(state, Keyword_if)) {
+        advance(state);
+
+        if (!punctuator(state, Punctuator_OpenParen)) {
+            return error(state, "expected opening parenthesis");
+        }
+        advance(state);
+
+        ast_expr_t *expr = malloc(sizeof(ast_expr_t));
+        parse_result_t result = {0};
+        if (iserror(result = parse_expr(state, expr))) {
+            return result;
+        }
+
+        if (!punctuator(state, Punctuator_CloseParen)) {
+            return error(state, "expected closing parenthesis");
+        }
+        advance(state);
+
+        ast_statement_t *stmt1 = malloc(sizeof(ast_statement_t));
+        if (iserror(result = parse_statement(state, stmt1))) {
+            return result;
+        }
+
+        ast_statement_t *stmt2 = NULL;
+        if (keyword(state, Keyword_else)) {
+            advance(state);
+
+            stmt2 = malloc(sizeof(ast_statement_t));
+            if (iserror(result = parse_statement(state, stmt2))) {
+                return result;
+            }
+        }
+
+        *statement = (ast_statement_t){
+            .kind = Ast_Statement_If,
+            .expr = expr,
+            .arm1 = stmt1,
+            .arm2 = stmt2,
+        };
     } else {
         return error(state, "expected statement");
     }
-
-    if (!punctuator(state, Punctuator_Semicolon)) {
-        return error(state, "expected semicolon");
-    }
-    advance(state);
 
     return ok();
 }

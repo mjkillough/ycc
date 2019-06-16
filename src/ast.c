@@ -66,6 +66,16 @@ void ast_print_statement(ast_statement_t *stmt) {
         ast_print_expr(stmt->expr);
         printf(")");
         break;
+    case Ast_Statement_If:
+        printf("If(");
+        ast_print_expr(stmt->expr);
+        printf(", ");
+        ast_print_statement(stmt->arm1);
+        if (stmt->arm2 != NULL) {
+            printf(", ");
+            ast_print_statement(stmt->arm2);
+        }
+        printf(")");
     }
 
     printf(")");

@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 
 #include "ast.h"
@@ -8,6 +9,7 @@
 typedef struct {
     map_t *env;
     size_t stack_idx;
+    uint64_t label_idx;
 } state_t;
 
 static size_t var_idx(state_t *state, const char *ident) {
@@ -96,6 +98,22 @@ static bool gen_statement(FILE *f, state_t *state, ast_statement_t *stmt) {
         map_insert(state->env, stmt->identifier, (void *)state->stack_idx);
         state->stack_idx += 4;
         break;
+    case Ast_Statement_If:
+        gen_expr(f, state, stmt->expr);
+        fprintf(f, "cmp $0, %%eax\n");
+        size_t end_label = state->label_idx++;
+        if (stmt->arm2 != NULL) {
+            size_t else_label = state->label_idx++;
+            fprintf(f, "je if_%zu\n", else_label);
+            gen_statement(f, state, stmt->arm1);
+            fprintf(f, "je if_%zu\n", end_label);
+            fprintf(f, "if_%zu:\n", else_label);
+            gen_statement(f, state, stmt->arm2);
+        } else {
+            fprintf(f, "je if_%zu\n", end_label);
+            gen_statement(f, state, stmt->arm1);
+        }
+        fprintf(f, "if_%zu:\n", end_label);
     }
     return true;
 }

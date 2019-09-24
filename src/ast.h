@@ -83,7 +83,7 @@ typedef struct {
 } ast_function_t;
 
 typedef struct {
-    map_t *functions; // ast_function_t
+    map *functions; // ast_function_t
 } ast_program_t;
 
 void ast_print_expr(ast_expr_t *expr);

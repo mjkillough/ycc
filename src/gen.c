@@ -4,11 +4,12 @@
 #include <stdlib.h>
 
 #include "ast.h"
+#include "common.h"
 #include "gen.h"
 #include "map.h"
 
 typedef struct {
-    map_t *env;
+    map *env;
     size_t stack_idx;
     uint64_t label_idx;
 } state_t;
@@ -183,11 +184,14 @@ static bool gen_function(FILE *f, ast_function_t *func) {
     return gen_block(f, &state, &func->block);
 }
 
+static bool gen_function_iter(void *context, const char *key, void *value) {
+    FILE *f = context;
+    UNUSED(key);
+    return gen_function(f, value);
+}
+
 static bool gen_program(FILE *f, ast_program_t *prog) {
-    map_entry_t *entry = NULL;
-    while (map_iter(prog->functions, &entry)) {
-        gen_function(f, entry->ptr);
-    }
+    return map_iter(prog->functions, f, &gen_function_iter);
 }
 
 bool gen_generate(FILE *f, ast_program_t ast) { return gen_program(f, &ast); }

@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "ast.h"
+#include "common.h"
 #include "map.h"
 
 static const char *ast_print_expr_binop(ast_expr_t *expr) {
@@ -134,9 +135,15 @@ void ast_print_function(ast_function_t *func) {
     printf("\n");
 }
 
+static bool ast_print_function_iter(void *context, const char *key,
+                                    void *value) {
+    UNUSED(context);
+    UNUSED(key);
+
+    ast_print_function(value);
+    return true;
+}
+
 void ast_print_program(ast_program_t *prog) {
-    map_entry_t *entry = NULL;
-    while (map_iter(prog->functions, &entry)) {
-        ast_print_function(entry->ptr);
-    }
+    map_iter(prog->functions, NULL, &ast_print_function_iter);
 }

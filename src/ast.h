@@ -12,7 +12,7 @@ typedef enum {
     Ast_BinOp_NotEqual,
     Ast_BinOp_LessThan,
     Ast_BinOp_LessThanEqual,
-    Ast_BinOp_GreatherThan,
+    Ast_BinOp_GreaterThan,
     Ast_BinOp_GreaterThanEqual,
 } ast_binop_t;
 

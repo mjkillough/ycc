@@ -179,7 +179,7 @@ parse_result_t parse_expr_relational(state_t *state, ast_expr_t *expr) {
     struct binop ops[] = {
         {Punctuator_LessThan, Ast_BinOp_LessThan},
         {Punctuator_LessThanEqual, Ast_BinOp_LessThanEqual},
-        {Punctuator_GreaterThan, Ast_BinOp_GreatherThan},
+        {Punctuator_GreaterThan, Ast_BinOp_GreaterThan},
         {Punctuator_GreaterThanEqual, Ast_BinOp_GreaterThanEqual},
     };
     return parse_expr_binop(state, expr, ops, sizeof(ops) / sizeof(ops[0]),

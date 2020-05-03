@@ -1,0 +1,1 @@
+Function(name=main, Block(Statement(Decl(int, a, Expr(1 + 2))), Statement(Decl(int, b, Expr(3 - 4))), Statement(Decl(int, c, Expr(5 * 6))), Statement(Decl(int, d, Expr(7 / 8))), Statement(Decl(int, f, Expr(3 != 4))), Statement(Decl(int, g, Expr(5 < 6))), Statement(Decl(int, h, Expr(7 <= 8))), Statement(Decl(int, j, Expr(1 >= 2)))))

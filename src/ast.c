@@ -22,7 +22,7 @@ static const char *ast_print_expr_binop(ast_expr_t *expr) {
         return "<";
     case Ast_BinOp_LessThanEqual:
         return "<=";
-    case Ast_BinOp_GreatherThan:
+    case Ast_BinOp_GreaterThan:
         return ">";
     case Ast_BinOp_GreaterThanEqual:
         return ">=";

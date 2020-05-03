@@ -1,0 +1,1 @@
+Function(name=main, Block(Statement(If(Expr(1 == 0), Statement(Block()), Statement(Block())))))

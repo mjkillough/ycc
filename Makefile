@@ -27,8 +27,8 @@ $(TARGET): $(OBJECTS)
 $(BUILD)%.o: $(SOURCE)%.c $(BUILD)
 	@$(CC) $(CFLAGS) -c $< -o $@
 
-$(TEST_TARGET): $(TEST_OBJECTS)
-	@$(CC) -o $(TEST_TARGET) $(TEST_OBJECTS)
+$(TEST_TARGET): $(TEST_OBJECTS) build/parser.o build/ast.o
+	$(CC) -o $(TEST_TARGET) $(TEST_OBJECTS) build/parser.o build/ast.o build/lexer.o build/map.o build/diag.o
 
 $(BUILD)tests/%.o: $(TEST_SOURCE)%.c $(BUILD)
 	@$(CC) $(CFLAGS) -I$(SOURCE) -c $< -o $@

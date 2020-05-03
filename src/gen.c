@@ -66,7 +66,7 @@ static bool gen_expr(FILE *f, state_t *state, ast_expr_t *expr) {
             fprintf(f, "mov $0, %%eax\n");
             fprintf(f, "setle %%al\n");
             break;
-        case Ast_BinOp_GreatherThan:
+        case Ast_BinOp_GreaterThan:
             fprintf(f, "cmp %%ecx, %%eax\n");
             fprintf(f, "mov $0, %%eax\n");
             fprintf(f, "setg %%al\n");

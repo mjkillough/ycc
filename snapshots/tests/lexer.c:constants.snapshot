@@ -1,0 +1,2 @@
+Token_Constant   { .str = "1" }
+Token_Constant   { .str = "123" }

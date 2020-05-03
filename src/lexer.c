@@ -202,21 +202,21 @@ static bool lexer_punctuation(lexer_state_t *state, token_t *next) {
     exit(-1);
 }
 
-void lexer_print_token(token_t tok) {
+void lexer_print_token(FILE *f, token_t tok) {
     switch (tok.discrim) {
     case Token_Keyword:
-        printf("Token_Keyword    { .keyword = %s }\n",
-               keyword_as_string(tok.keyword));
+        fprintf(f, "Token_Keyword    { .keyword = %s }\n",
+                keyword_as_string(tok.keyword));
         break;
     case Token_Identifier:
-        printf("Token_Identifier { .str = \"%s\" }\n", tok.str);
+        fprintf(f, "Token_Identifier { .str = \"%s\" }\n", tok.str);
         break;
     case Token_Constant:
-        printf("Token_Constant   { .str = \"%s\" }\n", tok.str);
+        fprintf(f, "Token_Constant   { .str = \"%s\" }\n", tok.str);
         break;
     case Token_Punctuator:
-        printf("Token_Punctuator { .punctuator = %s }\n",
-               punctuator_as_string(tok.punctuator));
+        fprintf(f, "Token_Punctuator { .punctuator = %s }\n",
+                punctuator_as_string(tok.punctuator));
         break;
     }
 }

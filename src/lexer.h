@@ -77,4 +77,4 @@ typedef struct {
 lexer_state_t lexer_new(const char *prog);
 bool lexer_next_token(lexer_state_t *state, token_t *next);
 
-void lexer_print_token(token_t tok);
+void lexer_print_token(FILE *f, token_t tok);

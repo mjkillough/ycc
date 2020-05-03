@@ -1,1 +1,4 @@
 build/
+tags
+snapshots/**/*.new
+out.s

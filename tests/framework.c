@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include "framework.h"
+#include "snapshot.h"
 
 #define OUTPUT_BUFFER_SIZE 512
 #define RESULT_PADDING 15
@@ -23,41 +24,44 @@
 extern struct test __start_tests;
 extern struct test __stop_tests;
 
-struct output {
-    char *data;
-    size_t length;
-};
-
-static void free_output(struct output output) { free(output.data); }
+const char *__test_name;
 
 // Reads fd until error or EOF, returning the output.
-// The caller is responsible for calling free_output() on the output.
-static struct output read_output(int fd) {
-    size_t total = OUTPUT_BUFFER_SIZE;
-    size_t remaining = total;
-    char *output = malloc(total);
+static char *read_output(int fd) {
+    char *output = NULL;
+    size_t size = 0;
+    FILE *f = open_memstream(&output, &size);
+    if (f == NULL) {
+        HANDLE_ERROR("open_memstream");
+    }
 
+    char buffer[OUTPUT_BUFFER_SIZE] = {0};
     while (true) {
-        ssize_t bytes = read(fd, output, remaining);
-        if (bytes == 0) {
+        ssize_t bytes_read = read(fd, buffer, OUTPUT_BUFFER_SIZE);
+        if (bytes_read == 0) {
             break; // EOF
-        } else if (bytes < 0) {
+        } else if (bytes_read < 0) {
             // EINTR?
-            perror("read");
-            exit(-1);
+            HANDLE_ERROR("read");
         }
 
-        remaining -= bytes;
-        if (!remaining) {
-            remaining = total;
-            total *= 2;
-            output = realloc(output, total);
+        ssize_t remaining = bytes_read;
+        while (remaining > 0) {
+            ssize_t bytes_written = fwrite(buffer + bytes_read - remaining,
+                                           sizeof(char), remaining, f);
+            if (bytes_written < remaining && ferror(f)) {
+                HANDLE_ERROR("fwrite");
+            }
+            remaining -= bytes_written;
+            if (!(remaining)) {
+                break;
+            }
         }
     }
 
-    total -= remaining;
-    output = realloc(output, total);
-    return (struct output){output, total};
+    fclose(f);
+
+    return output;
 }
 
 enum status {
@@ -82,7 +86,7 @@ static enum status check_status(pid_t pid) {
 
 struct result {
     struct test *test;
-    struct output output;
+    char *output;
     enum status status;
 };
 
@@ -91,7 +95,7 @@ static struct result *new_result() {
 }
 
 static void free_result(struct result *result) {
-    free_output(result->output);
+    free(result->output);
     free(result);
 }
 
@@ -107,10 +111,11 @@ static void redirect_io(int fd) {
 static void run_test(struct test *test, struct result *result) {
     result->test = test;
 
+    __test_name = test->name;
+
     int pipefd[2] = {0};
     if (pipe(pipefd) == -1) {
-        perror("pipe");
-        exit(-1);
+        HANDLE_ERROR("pipe");
     }
 
     fflush(stdout);
@@ -118,8 +123,7 @@ static void run_test(struct test *test, struct result *result) {
 
     pid_t pid = fork();
     if (pid == -1) {
-        perror("fork");
-        exit(-1);
+        HANDLE_ERROR("fork");
     } else if (pid == 0) {
         close(pipefd[0]);
         redirect_io(pipefd[1]);
@@ -162,7 +166,7 @@ static void print_output(struct test *test, struct result *result) {
     printf("--- ");
     print_status(result->status);
     printf(" %s: %s ---\n", test->file, test->name);
-    printf("%.*s\n", (int)result->output.length, result->output.data);
+    printf("%s\n", result->output);
 }
 
 // Runs all tests linked into executable. Returns true if all tests pass, false
@@ -221,4 +225,11 @@ static bool run_all_tests() {
     return !(fails > 0 || crashes > 0);
 }
 
-int main() { return run_all_tests() ? 0 : -1; }
+int main(int argc, char **argv) {
+    if (argc >= 2 && strcmp(argv[1], "review") == 0) {
+        snapshot_review();
+        return EXIT_SUCCESS;
+    }
+
+    return run_all_tests() ? EXIT_SUCCESS : EXIT_FAILURE;
+}

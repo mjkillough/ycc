@@ -18,6 +18,9 @@ all: $(TARGET)
 test: $(TEST_TARGET)
 	-$(TEST_TARGET)
 
+review: $(TEST_TARGET)
+	-$(TEST_TARGET) review
+
 $(TARGET): $(OBJECTS)
 	@$(CC) -o $(TARGET) $(OBJECTS)
 
@@ -28,7 +31,7 @@ $(TEST_TARGET): $(TEST_OBJECTS)
 	@$(CC) -o $(TEST_TARGET) $(TEST_OBJECTS)
 
 $(BUILD)tests/%.o: $(TEST_SOURCE)%.c $(BUILD)
-	@$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) -I$(SOURCE) -c $< -o $@
 
 $(BUILD):
 	@mkdir -p $@/tests

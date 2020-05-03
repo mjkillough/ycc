@@ -1,16 +1,30 @@
 #pragma once
 
 #include <stdlib.h>
+#include <errno.h>
 
 // Some inspiration from https://github.com/Snaipe/Criterion
+
+// Set to the current test name before the execution of each test:
+extern const char *__test_name;
+
+#define HANDLE_ERROR(msg)                                                      \
+    do {                                                                       \
+        printf("%s (%s:%i): %s\n", msg, __FILE__, __LINE__, strerror(errno));  \
+        exit(EXIT_FAILURE);                                                    \
+    } while (0)
+
+#define FAIL(msg1, msg2)                                                       \
+    do {                                                                       \
+        printf("\033[1;31m" msg1 " (%s:%i): \033[0m", __FILE__, __LINE__);     \
+        printf("%s\n", msg2);                                                  \
+        exit(1);                                                               \
+    } while (0)
 
 #define ASSERT(condition)                                                      \
     do {                                                                       \
         if (!(condition)) {                                                    \
-            printf("\033[1;31massertion failed: \033[0m");                     \
-            printf(#condition);                                                \
-            printf(" (%s:%i)\n", __FILE__, __LINE__);                          \
-            exit(1);                                                           \
+            FAIL("assertion failed", #condition);                              \
         }                                                                      \
     } while (0)
 

@@ -7,9 +7,21 @@
 #include "parser.h"
 
 int main() {
-    const char *prog =
-        "int main()\n{\n\tint j = 11; j += 3 + - 4; return "
-        "j;\n} int foo() { return 4; } int blah() { return 5; }\n";
+    const char *prog = "int main() {\n"
+                       "    int j = 11;\n"
+                       "    j += 3 + - 4;\n"
+                       "    return j;\n"
+                       "}\n"
+                       "\n"
+                       ""
+                       "int foo() {\n"
+                       "    return 4;\n"
+                       "}\n"
+                       "\n"
+                       ""
+                       "int blah() {\n"
+                       "    return 5;\n"
+                       "}\n";
 
     // lexer_state_t state = lexer_new(prog);
     // token_t token;
@@ -36,9 +48,9 @@ int main() {
     ast_pprint_program(pp, &program);
     pprint_free(pp);
 
-    printf("---\n\n");
-    printf("ASM:\n");
-    gen_generate(stdout, program);
+    /* printf("---\n\n"); */
+    /* printf("ASM:\n"); */
+    /* gen_generate(stdout, program); */
 
     FILE *f = fopen("out.s", "w");
     if (f == NULL) {

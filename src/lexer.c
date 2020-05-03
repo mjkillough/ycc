@@ -79,8 +79,8 @@ static bool lexer_constant(lexer_state_t *state, token_t *next) {
             advance(state);
         } else {
             size_t len = state->unlexed - start;
-            char *str = (char *)malloc(len);
-            strncpy(str, start, len);
+            char *str = (char *)malloc(len + 1);
+            strlcpy(str, start, len + 1);
 
             *next = (token_t){.discrim = Token_Constant,
                               .str = str,
@@ -115,8 +115,8 @@ static bool lexer_identifier_or_keyword(lexer_state_t *state, token_t *next) {
                 };
                 return true;
             } else {
-                char *str = (char *)malloc(len);
-                strncpy(str, start, len);
+                char *str = (char *)malloc(len + 1);
+                strlcpy(str, start, len + 1);
 
                 *next =
                     (token_t){.discrim = Token_Identifier,

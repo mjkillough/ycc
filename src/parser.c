@@ -443,6 +443,8 @@ parse_result_t parse_program(state_t *state, ast_program_t *program) {
 
     *program = (ast_program_t){.functions = functions};
 
+    // TODO: free functions
+
     return ok();
 }
 

@@ -1,3 +1,7 @@
 Function(name=main, Block(
-    Statement(Decl(int, a, 0))
+    Statement(Assign(Var(a) = 0)), 
+    Statement(Assign(Var(b) += 1)), 
+    Statement(Assign(Var(c) -= 2)), 
+    Statement(Assign(Var(d) *= 3)), 
+    Statement(Assign(Var(e) /= 4))
 ))

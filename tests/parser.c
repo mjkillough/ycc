@@ -40,12 +40,16 @@ PARSER_TEST(binops, "int main() {\n"
                     "int j = 1 >= 2;\n"
                     "}")
 
+PARSER_TEST(decl, "int main() {\n"
+                  "int a = 0;\n"
+                  "}")
+
 PARSER_TEST(assignops, "int main() {\n"
-                       "int a =  0;\n"
-                       //"int b += 1;\n"
-                       //"int c -= 2;\n"
-                       //"int d *= 3;\n"
-                       //"int e /= 4;\n"
+                       "a  = 0;\n"
+                       "b += 1;\n"
+                       "c -= 2;\n"
+                       "d *= 3;\n"
+                       "e /= 4;\n"
                        "}")
 
 PARSER_TEST(expr_variables, "int main() {\n"

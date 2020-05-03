@@ -32,11 +32,11 @@ PARSER_TEST(binops, "int main() {\n"
                     "int b = 3 - 4;\n"
                     "int c = 5 * 6;\n"
                     "int d = 7 / 8;\n"
-                    //"int e = 1 == 2;\n"
+                    "int e = 1 == 2;\n"
                     "int f = 3 != 4;\n"
                     "int g = 5 <  6;\n"
                     "int h = 7 <= 8;\n"
-                    //"int i = 9 >  0;\n"
+                    "int i = 9 >  0;\n"
                     "int j = 1 >= 2;\n"
                     "}")
 

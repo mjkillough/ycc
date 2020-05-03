@@ -1,3 +1,4 @@
 Token_Keyword    { .keyword = int }
 Token_Keyword    { .keyword = return }
 Token_Keyword    { .keyword = if }
+Token_Keyword    { .keyword = else }

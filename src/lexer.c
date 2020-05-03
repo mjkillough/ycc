@@ -18,7 +18,8 @@ static const struct {
 
 static bool lookup_keyword(const char *str, size_t len, token_keyword_t *out) {
     for (size_t i = 0; i < sizeof(keywords) / sizeof(keywords[0]); i++) {
-        if (strncmp(str, keywords[i].str, len) == 0) {
+        if (strlen(keywords[i].str) == len &&
+            strncmp(str, keywords[i].str, len) == 0) {
             *out = keywords[i].keyword;
             return true;
         }

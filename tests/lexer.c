@@ -26,7 +26,9 @@ LEXER_TEST(punctuator, ";\n"
                        "+ - * /\n"
                        "( ) { }\n")
 
-LEXER_TEST(keywords, "int return if else")
+LEXER_TEST(keywords, "int return if else\n")
+
+LEXER_TEST(identifiers_not_keywords, "e i\n")
 
 // TODO: Why is 0 skipped?
 LEXER_TEST(constants, "1 123 0")

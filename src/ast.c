@@ -48,91 +48,91 @@ static const char *ast_print_expr_assignop(ast_expr_t *expr) {
     }
 }
 
-void ast_print_expr(ast_expr_t *expr) {
+void ast_print_expr(FILE *f, ast_expr_t *expr) {
     switch (expr->discrim) {
     case Ast_Expr_Constant:
-        printf("%s", expr->str);
+        fprintf(f, "%s", expr->str);
         break;
     case Ast_Expr_Var:
-        printf("Var(%s)", expr->str);
+        fprintf(f, "Var(%s)", expr->str);
         break;
     case Ast_Expr_BinOp:
-        printf("Expr(");
-        ast_print_expr(expr->lhs);
-        printf(" %s ", ast_print_expr_binop(expr));
-        ast_print_expr(expr->rhs);
-        printf(")");
+        fprintf(f, "Expr(");
+        ast_print_expr(f, expr->lhs);
+        fprintf(f, " %s ", ast_print_expr_binop(expr));
+        ast_print_expr(f, expr->rhs);
+        fprintf(f, ")");
         break;
     case Ast_Expr_UnOp:
-        printf("Expr(Neg(");
-        ast_print_expr(expr->lhs);
+        fprintf(f, "Expr(Neg(");
+        ast_print_expr(f, expr->lhs);
         printf("))");
         break;
     case Ast_Expr_AssignOp:
-        printf("Assign(");
-        ast_print_expr(expr->lhs);
-        printf(" %s ", ast_print_expr_assignop(expr));
-        ast_print_expr(expr->rhs);
-        printf(")");
+        fprintf(f, "Assign(");
+        ast_print_expr(f, expr->lhs);
+        fprintf(f, " %s ", ast_print_expr_assignop(expr));
+        ast_print_expr(f, expr->rhs);
+        fprintf(f, ")");
         break;
     }
 }
 
-void ast_print_block(ast_block_t *block);
+void ast_print_block(FILE *f, ast_block_t *block);
 
-void ast_print_statement(ast_statement_t *stmt) {
-    printf("Statement(");
+void ast_print_statement(FILE *f, ast_statement_t *stmt) {
+    fprintf(f, "Statement(");
 
     switch (stmt->kind) {
     case Ast_Statement_Return:
-        printf("Return(");
-        ast_print_expr(stmt->expr);
-        printf(")");
+        fprintf(f, "Return(");
+        ast_print_expr(f, stmt->expr);
+        fprintf(f, ")");
         break;
     case Ast_Statement_Decl:
-        printf("Decl(int, %s, ", stmt->identifier);
-        ast_print_expr(stmt->expr);
-        printf(")");
+        fprintf(f, "Decl(int, %s, ", stmt->identifier);
+        ast_print_expr(f, stmt->expr);
+        fprintf(f, ")");
         break;
     case Ast_Statement_If:
-        printf("If(");
-        ast_print_expr(stmt->expr);
-        printf(", ");
-        ast_print_statement(stmt->arm1);
+        fprintf(f, "If(");
+        ast_print_expr(f, stmt->expr);
+        fprintf(f, ", ");
+        ast_print_statement(f, stmt->arm1);
         if (stmt->arm2 != NULL) {
-            printf(", ");
-            ast_print_statement(stmt->arm2);
+            fprintf(f, ", ");
+            ast_print_statement(f, stmt->arm2);
         }
-        printf(")");
+        fprintf(f, ")");
         break;
     case Ast_Statement_Block:
-        ast_print_block(stmt->block);
+        ast_print_block(f, stmt->block);
         break;
     case Ast_Statement_Expr:
-        ast_print_expr(stmt->expr);
+        ast_print_expr(f, stmt->expr);
         break;
     }
 
-    printf(")");
+    fprintf(f, ")");
 }
 
-void ast_print_block(ast_block_t *block) {
-    printf("Block(");
+void ast_print_block(FILE *f, ast_block_t *block) {
+    fprintf(f, "Block(");
     for (size_t i = 0; i < block->count; i++) {
-        ast_print_statement(&block->stmts[i]);
+        ast_print_statement(f, &block->stmts[i]);
 
         if (i < block->count - 1) {
-            printf(", ");
+            fprintf(f, ", ");
         }
     }
-    printf(")");
+    fprintf(f, ")");
 }
 
-void ast_print_function(ast_function_t *func) {
-    printf("Function(name=%s, ", func->name);
-    ast_print_block(&func->block);
-    printf(")");
-    printf("\n");
+void ast_print_function(FILE *f, ast_function_t *func) {
+    fprintf(f, "Function(name=%s, ", func->name);
+    ast_print_block(f, &func->block);
+    fprintf(f, ")");
+    fprintf(f, "\n");
 }
 
 static bool ast_print_function_iter(void *context, const char *key,
@@ -140,10 +140,11 @@ static bool ast_print_function_iter(void *context, const char *key,
     UNUSED(context);
     UNUSED(key);
 
-    ast_print_function(value);
+    FILE *f = (FILE *)context;
+    ast_print_function(f, value);
     return true;
 }
 
-void ast_print_program(ast_program_t *prog) {
-    map_iter(prog->functions, NULL, &ast_print_function_iter);
+void ast_print_program(FILE *f, ast_program_t *prog) {
+    map_iter(prog->functions, f, &ast_print_function_iter);
 }

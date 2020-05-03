@@ -31,7 +31,7 @@ int main() {
 
     printf("---\n\n");
     printf("AST:\n");
-    ast_print_program(&program);
+    ast_print_program(stdout, &program);
 
     printf("---\n\n");
     printf("ASM:\n");

@@ -48,7 +48,7 @@ static bool diff(const char *file1, const char *file2) {
     if (stream == NULL) {
         HANDLE_ERROR("open_memstream");
     }
-    fprintf(stream, "diff %s %s", file1, file2);
+    fprintf(stream, "sdiff %s %s", file1, file2);
     fclose(stream);
 
     int status = system(buffer);

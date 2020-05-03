@@ -1,1 +1,3 @@
-Function(name=main, Block(Statement(Return(0))))
+Function(name=main, Block(
+    Statement(Return(0))
+))

@@ -17,7 +17,9 @@ static void parser_snapshotter(FILE *f, void *data) {
         FAIL("FAILED TO PARSE", "");
     }
 
-    ast_print_program(f, &program);
+    struct pprint *pp = pprint_new(f);
+    ast_pprint_program(pp, &program);
+    pprint_free(pp);
 }
 
 #define PARSER_TEST(name, prog)                                                \

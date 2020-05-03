@@ -1,1 +1,3 @@
-Function(name=main, Block(Statement(Decl(int, a, Expr(Var(a) + Var(b))))))
+Function(name=main, Block(
+    Statement(Decl(int, a, Expr(Var(a) + Var(b))))
+))

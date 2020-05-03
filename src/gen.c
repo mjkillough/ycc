@@ -21,66 +21,66 @@ static size_t var_idx(state_t *state, const char *ident) {
 static bool gen_expr(FILE *f, state_t *state, ast_expr_t *expr) {
     switch (expr->discrim) {
     case Ast_Expr_Constant:
-        fprintf(f, "mov $%s, %%eax\n", expr->str);
+        fprintf(f, "mov $%s, %%rax\n", expr->str);
         break;
     case Ast_Expr_Var:
-        fprintf(f, "mov -%zu(%%ebp), %%eax\n", var_idx(state, expr->str));
+        fprintf(f, "mov -%zu(%%rbp), %%rax\n", var_idx(state, expr->str));
         break;
     case Ast_Expr_BinOp:
         gen_expr(f, state, expr->rhs);
-        fprintf(f, "push %%eax\n");
+        fprintf(f, "pushq %%rax\n");
         gen_expr(f, state, expr->lhs);
-        fprintf(f, "pop %%ecx\n");
+        fprintf(f, "popq %%rcx\n");
 
         switch (expr->binop) {
         case Ast_BinOp_Addition:
-            fprintf(f, "add %%ecx, %%eax\n");
+            fprintf(f, "add %%rcx, %%rax\n");
             break;
         case Ast_BinOp_Subtraction:
-            fprintf(f, "sub %%ecx, %%eax\n");
+            fprintf(f, "sub %%rcx, %%rax\n");
             break;
         case Ast_BinOp_Multiplication:
-            fprintf(f, "imul %%ecx, %%eax\n");
+            fprintf(f, "imul %%rcx, %%rax\n");
             break;
         case Ast_BinOp_Division:
-            fprintf(f, "mov $0, %%edx\n");
-            fprintf(f, "idiv %%ecx\n");
+            fprintf(f, "mov $0, %%rdx\n");
+            fprintf(f, "idiv %%rcx\n");
             break;
         case Ast_BinOp_Equal:
-            fprintf(f, "cmp %%ecx, %%eax\n");
-            fprintf(f, "mov $0, %%eax\n");
+            fprintf(f, "cmp %%rcx, %%rax\n");
+            fprintf(f, "mov $0, %%rax\n");
             fprintf(f, "sete %%al\n");
             break;
         case Ast_BinOp_NotEqual:
-            fprintf(f, "cmp %%ecx, %%eax\n");
-            fprintf(f, "mov $0, %%eax\n");
+            fprintf(f, "cmp %%rcx, %%rax\n");
+            fprintf(f, "mov $0, %%rax\n");
             fprintf(f, "setne %%al\n");
             break;
         case Ast_BinOp_LessThan:
-            fprintf(f, "cmp %%ecx, %%eax\n");
-            fprintf(f, "mov $0, %%eax\n");
+            fprintf(f, "cmp %%rcx, %%rax\n");
+            fprintf(f, "mov $0, %%rax\n");
             fprintf(f, "setl %%al\n");
             break;
         case Ast_BinOp_LessThanEqual:
-            fprintf(f, "cmp %%ecx, %%eax\n");
-            fprintf(f, "mov $0, %%eax\n");
+            fprintf(f, "cmp %%rcx, %%rax\n");
+            fprintf(f, "mov $0, %%rax\n");
             fprintf(f, "setle %%al\n");
             break;
         case Ast_BinOp_GreaterThan:
-            fprintf(f, "cmp %%ecx, %%eax\n");
-            fprintf(f, "mov $0, %%eax\n");
+            fprintf(f, "cmp %%rcx, %%rax\n");
+            fprintf(f, "mov $0, %%rax\n");
             fprintf(f, "setg %%al\n");
             break;
         case Ast_BinOp_GreaterThanEqual:
-            fprintf(f, "cmp %%ecx, %%eax\n");
-            fprintf(f, "mov $0, %%eax\n");
+            fprintf(f, "cmp %%rcx, %%rax\n");
+            fprintf(f, "mov $0, %%rax\n");
             fprintf(f, "setge %%al\n");
             break;
         }
         break;
     case Ast_Expr_UnOp:
         gen_expr(f, state, expr->lhs);
-        fprintf(f, "neg %%eax\n");
+        fprintf(f, "neg %%rax\n");
         break;
     case Ast_Expr_AssignOp:
         if (expr->lhs->discrim != Ast_Expr_Var) {
@@ -92,32 +92,32 @@ static bool gen_expr(FILE *f, state_t *state, ast_expr_t *expr) {
 
         switch (expr->assignop) {
         case Ast_AssignOp_Assign:
-            fprintf(f, "mov %%eax, ");
+            fprintf(f, "mov %%rax, ");
             break;
         case Ast_AssignOp_Addition:
-            fprintf(f, "add %%eax, ");
+            fprintf(f, "add %%rax, ");
             break;
         case Ast_AssignOp_Subtraction:
-            fprintf(f, "sub %%eax, ");
+            fprintf(f, "sub %%rax, ");
             break;
         case Ast_AssignOp_Multiplication:
-            fprintf(f, "mov %%eax, %%ecx\n");
-            fprintf(f, "mov -%zu(%%ebp), %%eax\n",
+            fprintf(f, "mov %%rax, %%rcx\n");
+            fprintf(f, "mov -%zu(%%rbp), %%rax\n",
                     var_idx(state, expr->lhs->str));
-            fprintf(f, "imul %%ecx, %%eax\n");
-            fprintf(f, "mov %%eax, ");
+            fprintf(f, "imul %%rcx, %%rax\n");
+            fprintf(f, "mov %%rax, ");
             break;
         case Ast_AssignOp_Division:
-            fprintf(f, "mov %%eax, %%ecx\n");
-            fprintf(f, "mov $0, %%edx\n");
-            fprintf(f, "mov -%zu(%%ebp), %%eax\n",
+            fprintf(f, "mov %%rax, %%rcx\n");
+            fprintf(f, "mov $0, %%rdx\n");
+            fprintf(f, "mov -%zu(%%rbp), %%rax\n",
                     var_idx(state, expr->lhs->str));
-            fprintf(f, "idiv %%ecx\n");
-            fprintf(f, "mov %%eax, ");
+            fprintf(f, "idiv %%rcx\n");
+            fprintf(f, "mov %%rax, ");
             break;
         }
 
-        fprintf(f, "-%zu(%%ebp)\n", var_idx(state, expr->lhs->str));
+        fprintf(f, "-%zu(%%rbp)\n", var_idx(state, expr->lhs->str));
     }
     return true;
 }
@@ -128,19 +128,19 @@ static bool gen_statement(FILE *f, state_t *state, ast_statement_t *stmt) {
     switch (stmt->kind) {
     case Ast_Statement_Return:
         gen_expr(f, state, stmt->expr);
-        fprintf(f, "mov %%ebp, %%esp\n");
-        fprintf(f, "pop %%ebp\n");
+        fprintf(f, "mov %%rbp, %%rsp\n");
+        fprintf(f, "popq %%rbp\n");
         fprintf(f, "ret\n");
         break;
     case Ast_Statement_Decl:
         gen_expr(f, state, stmt->expr);
-        fprintf(f, "push %%eax\n");
+        fprintf(f, "pushq %%rax\n");
         map_insert(state->env, stmt->identifier, (void *)state->stack_idx);
-        state->stack_idx += 4;
+        state->stack_idx += 8;
         break;
     case Ast_Statement_If:
         gen_expr(f, state, stmt->expr);
-        fprintf(f, "cmp $0, %%eax\n");
+        fprintf(f, "cmp $0, %%rax\n");
         size_t end_label = state->label_idx++;
         if (stmt->arm2 != NULL) {
             size_t else_label = state->label_idx++;
@@ -175,12 +175,12 @@ static bool gen_block(FILE *f, state_t *state, ast_block_t *block) {
 static bool gen_function(FILE *f, ast_function_t *func) {
     state_t state = {
         .env = map_new(),
-        .stack_idx = 4,
+        .stack_idx = 8,
     };
     fprintf(f, " .globl %s\n", func->name);
     fprintf(f, "%s:\n", func->name);
-    fprintf(f, "push %%ebp\n");
-    fprintf(f, "mov %%esp, %%ebp\n");
+    fprintf(f, "pushq %%rbp\n");
+    fprintf(f, "mov %%rsp, %%rbp\n");
     return gen_block(f, &state, &func->block);
 }
 

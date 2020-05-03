@@ -170,13 +170,23 @@ void ast_pprint_statement(struct pprint *pp, ast_statement_t *stmt) {
 
 void ast_pprint_block(struct pprint *pp, ast_block_t *block) {
     pprintf(pp, "Block(");
+
+    pprint_indent(pp);
+    if (block->count > 0) {
+        pprint_newline(pp);
+    }
+
     for (size_t i = 0; i < block->count; i++) {
         ast_pprint_statement(pp, &block->stmts[i]);
 
         if (i < block->count - 1) {
             pprintf(pp, ", ");
         }
+        pprint_newline(pp);
     }
+
+    pprint_unindent(pp);
+
     pprintf(pp, ")");
 }
 
@@ -184,7 +194,8 @@ void ast_pprint_function(struct pprint *pp, ast_function_t *func) {
     pprintf(pp, "Function(name=%s, ", func->name);
     ast_pprint_block(pp, &func->block);
     pprintf(pp, ")");
-    pprintf(pp, "\n");
+
+    pprint_newline(pp);
 }
 
 static bool ast_pprint_function_iter(void *context, const char *key,

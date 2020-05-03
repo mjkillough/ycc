@@ -67,4 +67,3 @@ PARSER_TEST(multiple_functions, "int main() {}\n"
 
 // TODO: "void no_return_type() {}\n"
 // TODO: "int arguments(int i) {}\n"
-

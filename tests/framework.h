@@ -1,7 +1,7 @@
 #pragma once
 
-#include <stdlib.h>
 #include <errno.h>
+#include <stdlib.h>
 
 // Some inspiration from https://github.com/Snaipe/Criterion
 

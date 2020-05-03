@@ -23,8 +23,8 @@ test: $(TEST_TARGET)
 review: $(TEST_TARGET)
 	-$(TEST_TARGET) review
 
-$(TARGET): $(OBJECTS) $(BUILD)/main.o $(BIN)
-	@$(CC) -o $(TARGET) $(OBJECTS)
+$(TARGET): $(OBJECTS) $(BUILD)main.o $(BIN)
+	@$(CC) -o $(TARGET) $(OBJECTS) $(BUILD)main.o
 
 $(BUILD)%.o: $(SOURCE)%.c $(BUILD)
 	@$(CC) $(CFLAGS) -c $< -o $@

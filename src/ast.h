@@ -86,7 +86,14 @@ typedef struct {
     map *functions; // ast_function_t
 } ast_program_t;
 
-void ast_print_expr(FILE *f, ast_expr_t *expr);
-void ast_print_statement(FILE *f, ast_statement_t *statment);
-void ast_print_function(FILE *f, ast_function_t *func);
-void ast_print_program(FILE *f, ast_program_t *prog);
+struct pprint;
+
+struct pprint *pprint_new(FILE *f);
+void pprint_free(struct pprint *pp);
+
+void ast_pprint_expr(struct pprint *pp, ast_expr_t *expr);
+void ast_pprint_statement(struct pprint *pp, ast_statement_t *statment);
+void ast_pprint_block(struct pprint *pp, ast_block_t *block);
+void ast_pprint_function(struct pprint *pp, ast_function_t *func);
+void ast_pprint_program(struct pprint *pp, ast_program_t *prog);
+

@@ -31,7 +31,10 @@ int main() {
 
     printf("---\n\n");
     printf("AST:\n");
-    ast_print_program(stdout, &program);
+
+    struct pprint *pp = pprint_new(stdout);
+    ast_pprint_program(pp, &program);
+    pprint_free(pp);
 
     printf("---\n\n");
     printf("ASM:\n");

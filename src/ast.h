@@ -1,5 +1,8 @@
 #pragma once
 
+#include <stddef.h>
+#include <stdio.h>
+
 #include "map.h"
 
 typedef enum {

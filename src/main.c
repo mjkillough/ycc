@@ -5,11 +5,13 @@
 #include "gen.h"
 #include "lexer.h"
 #include "parser.h"
+#include "tycheck.h"
 
 int main() {
     const char *prog = "int main() {\n"
                        "    int j = 11;\n"
                        "    int *k = 0;\n"
+                       "    j = k;\n"
                        "    j += 3 + - 4;\n"
                        "    return j;\n"
                        "}\n"
@@ -37,6 +39,10 @@ int main() {
         diag_print(prog, &result.diag);
         return -1;
     }
+
+    struct tycheck *tyc = tycheck_new();
+    tycheck_check(tyc, &program);
+    tycheck_free(tyc);
 
     printf("---\n\n");
     printf("Source:\n");

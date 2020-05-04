@@ -133,9 +133,10 @@ static bool gen_statement(FILE *f, state_t *state, ast_statement_t *stmt) {
         fprintf(f, "ret\n");
         break;
     case Ast_Statement_Decl:
-        gen_expr(f, state, stmt->expr);
+        gen_expr(f, state, stmt->decl->expr);
         fprintf(f, "pushq %%rax\n");
-        map_insert(state->env, stmt->identifier, (void *)state->stack_idx);
+        map_insert(state->env, stmt->decl->identifier,
+                   (void *)state->stack_idx);
         state->stack_idx += 8;
         break;
     case Ast_Statement_If:

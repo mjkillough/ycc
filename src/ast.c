@@ -5,47 +5,8 @@
 #include "ast.h"
 #include "common.h"
 #include "map.h"
-
-struct pprint {
-    FILE *f;
-    bool newline;
-    size_t indent;
-};
-
-struct pprint *pprint_new(FILE *f) {
-    struct pprint *pp = calloc(1, sizeof(struct pprint));
-    pp->f = f;
-    return pp;
-}
-
-void pprint_free(struct pprint *pp) { free(pp); }
-
-static void pprintf(struct pprint *pp, const char *fmt, ...);
-static void pprint_newline(struct pprint *pp);
-static void pprint_indent(struct pprint *pp);
-static void pprint_unindent(struct pprint *pp);
-
-static void pprintf(struct pprint *pp, const char *fmt, ...) {
-    if (pp->newline) {
-        for (size_t i = 0; i < pp->indent; i++) {
-            fprintf(pp->f, "    ");
-        }
-    }
-    pp->newline = false;
-
-    va_list args;
-    va_start(args, fmt);
-    vfprintf(pp->f, fmt, args);
-    va_end(args);
-}
-
-static void pprint_newline(struct pprint *pp) {
-    fprintf(pp->f, "\n");
-    pp->newline = true;
-}
-
-static void pprint_indent(struct pprint *pp) { pp->indent++; }
-static void pprint_unindent(struct pprint *pp) { pp->indent--; }
+#include "pprint.h"
+#include "ty.h"
 
 static const char *_expr_binop(ast_expr_t *expr);
 static const char *_expr_assignop(ast_expr_t *expr);
@@ -139,8 +100,10 @@ void ast_pprint_statement(struct pprint *pp, ast_statement_t *stmt) {
         break;
 
     case Ast_Statement_Decl:
-        pprintf(pp, "Decl(int, %s, ", stmt->identifier);
-        ast_pprint_expr(pp, stmt->expr);
+        pprintf(pp, "Decl(");
+        ty_pprint(pp, &stmt->decl->ty);
+        pprintf(pp, ", %s, ", stmt->decl->identifier);
+        ast_pprint_expr(pp, stmt->decl->expr);
         pprintf(pp, ")");
         break;
 

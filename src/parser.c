@@ -6,6 +6,7 @@
 #include "lexer.h"
 #include "map.h"
 #include "parser.h"
+#include "ty.h"
 
 typedef struct {
     const char *prog;
@@ -273,6 +274,12 @@ parse_result_t parse_statement(state_t *state, ast_statement_t *statement) {
     } else if (keyword(state, Keyword_int)) {
         advance(state);
 
+        bool ptr = false;
+        if (punctuator(state, Punctuator_Asterisk)) {
+            advance(state);
+            ptr = true;
+        }
+
         const char *ident;
         if (!identifier(state, &ident)) {
             return error(state, "expected identifier");
@@ -290,10 +297,28 @@ parse_result_t parse_statement(state_t *state, ast_statement_t *statement) {
             return result;
         }
 
+        struct decl *decl = (struct decl *)malloc(sizeof(struct decl));
+        if (!ptr) {
+            decl->ty = (struct ty){
+                .kind = Ty_Basic,
+                .basic = BasicTy_Int,
+            };
+        } else {
+            struct ty *inner = (struct ty *)malloc(sizeof(struct ty));
+            inner->kind = Ty_Basic;
+            inner->basic = BasicTy_Int;
+
+            decl->ty = (struct ty){
+                .kind = Ty_Pointer,
+                .inner = inner,
+            };
+        }
+        decl->identifier = ident;
+        decl->expr = expr;
+
         *statement = (ast_statement_t){
             .kind = Ast_Statement_Decl,
-            .identifier = ident,
-            .expr = expr,
+            .decl = decl,
         };
 
         if (!punctuator(state, Punctuator_Semicolon)) {

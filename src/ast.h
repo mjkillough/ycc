@@ -4,6 +4,8 @@
 #include <stdio.h>
 
 #include "map.h"
+#include "pprint.h"
+#include "ty.h"
 
 typedef enum {
     Ast_BinOp_Addition,
@@ -55,6 +57,12 @@ typedef struct ast_expr_t {
 
 struct ast_block_t;
 
+struct decl {
+    struct ty ty;
+    const char *identifier;
+    struct ast_expr_t *expr;
+};
+
 typedef struct ast_statement_t {
     enum {
         Ast_Statement_Return,
@@ -64,7 +72,7 @@ typedef struct ast_statement_t {
         Ast_Statement_Expr,
     } kind;
     // Ast_Statement_Decl:
-    const char *identifier;
+    struct decl *decl;
     // Ast_Statement_Return, Ast_Statement_Decl, Ast_Statement_Expr,
     // Ast_Statement_If:
     ast_expr_t *expr;
@@ -88,11 +96,6 @@ typedef struct {
 typedef struct {
     map *functions; // ast_function_t
 } ast_program_t;
-
-struct pprint;
-
-struct pprint *pprint_new(FILE *f);
-void pprint_free(struct pprint *pp);
 
 void ast_pprint_expr(struct pprint *pp, ast_expr_t *expr);
 void ast_pprint_statement(struct pprint *pp, ast_statement_t *statment);

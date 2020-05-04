@@ -42,6 +42,7 @@ PARSER_TEST(binops, "int main() {\n"
 
 PARSER_TEST(decl, "int main() {\n"
                   "int a = 0;\n"
+                  "int *b = 0;\n"
                   "}")
 
 PARSER_TEST(assignops, "int main() {\n"

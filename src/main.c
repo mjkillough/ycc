@@ -9,6 +9,7 @@
 int main() {
     const char *prog = "int main() {\n"
                        "    int j = 11;\n"
+                       "    int *k = 0;\n"
                        "    j += 3 + - 4;\n"
                        "    return j;\n"
                        "}\n"

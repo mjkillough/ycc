@@ -96,6 +96,7 @@ parse_result_t parse_expr_unary(state_t *state, ast_expr_t *expr) {
     struct unop ops[] = {
         {Punctuator_Minus, Ast_UnOp_Negation},
         {Punctuator_Ampersand, Ast_UnOp_AddressOf},
+        {Punctuator_Asterisk, Ast_UnOp_Deref},
     };
     size_t num_ops = sizeof(ops) / sizeof(ops[0]);
 

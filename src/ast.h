@@ -24,6 +24,7 @@ typedef enum {
 typedef enum {
     Ast_UnOp_Negation,
     Ast_UnOp_AddressOf,
+    Ast_UnOp_Deref,
 } ast_unop_t;
 
 typedef enum {

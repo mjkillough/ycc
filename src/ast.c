@@ -68,6 +68,12 @@ static void _expr_unop(struct pprint *pp, ast_expr_t *expr) {
         ast_pprint_expr(pp, expr->lhs);
         pprintf(pp, ")");
         break;
+
+    case Ast_UnOp_Deref:
+        pprintf(pp, "Deref(");
+        ast_pprint_expr(pp, expr->lhs);
+        pprintf(pp, ")");
+        break;
     }
 }
 

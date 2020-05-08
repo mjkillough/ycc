@@ -79,12 +79,33 @@ static bool gen_expr(FILE *f, state_t *state, ast_expr_t *expr) {
         }
         break;
     case Ast_Expr_UnOp:
-        gen_expr(f, state, expr->lhs);
-        fprintf(f, "neg %%rax\n");
+        switch (expr->unop) {
+        case Ast_UnOp_Negation:
+            gen_expr(f, state, expr->lhs);
+            fprintf(f, "neg %%rax\n");
+            break;
+        case Ast_UnOp_AddressOf:
+            if (expr->lhs->discrim != Ast_Expr_Var) {
+                printf("error: can only take address of variables\n");
+                exit(-1);
+            }
+            fprintf(f, "mov %%rbp, %%rax\n");
+            fprintf(f, "sub $%zu, %%rax\n", var_idx(state, expr->lhs->str));
+            break;
+        case Ast_UnOp_Deref:
+            if (expr->lhs->discrim != Ast_Expr_Var) {
+                printf("error: can only take address of variables\n");
+                exit(-1);
+            }
+            fprintf(f, "mov -%zu(%%rbp), %%rax\n",
+                    var_idx(state, expr->lhs->str));
+            fprintf(f, "mov (%%rax), %%rax\n");
+            break;
+        }
         break;
     case Ast_Expr_AssignOp:
         if (expr->lhs->discrim != Ast_Expr_Var) {
-            printf("error: can only assign to variables");
+            printf("error: can only assign to variables\n");
             exit(-1);
         }
 
@@ -163,6 +184,9 @@ static bool gen_statement(FILE *f, state_t *state, ast_statement_t *stmt) {
         gen_expr(f, state, stmt->expr);
         break;
     }
+
+    fprintf(f, "\n");
+
     return true;
 }
 

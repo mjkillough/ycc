@@ -10,10 +10,9 @@
 int main() {
     const char *prog = "int main() {\n"
                        "    int j = 11;\n"
-                       "    int *k = 0;\n"
-                       "    j = k;\n"
-                       "    j += 3 + - 4;\n"
-                       "    return j;\n"
+                       "    int *k = &j;\n"
+                       "    int l = *k + 2;\n"
+                       "    return l;\n"
                        "}\n"
                        "\n"
                        ""

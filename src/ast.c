@@ -55,6 +55,22 @@ static const char *_expr_assignop(ast_expr_t *expr) {
     }
 }
 
+static void _expr_unop(struct pprint *pp, ast_expr_t *expr) {
+    switch (expr->unop) {
+    case Ast_UnOp_Negation:
+        pprintf(pp, "Neg(");
+        ast_pprint_expr(pp, expr->lhs);
+        pprintf(pp, ")");
+        break;
+
+    case Ast_UnOp_AddressOf:
+        pprintf(pp, "AddrOf(");
+        ast_pprint_expr(pp, expr->lhs);
+        pprintf(pp, ")");
+        break;
+    }
+}
+
 void ast_pprint_expr(struct pprint *pp, ast_expr_t *expr) {
     switch (expr->discrim) {
     case Ast_Expr_Constant:
@@ -74,9 +90,9 @@ void ast_pprint_expr(struct pprint *pp, ast_expr_t *expr) {
         break;
 
     case Ast_Expr_UnOp:
-        pprintf(pp, "Expr(Neg(");
-        ast_pprint_expr(pp, expr->lhs);
-        pprintf(pp, "))");
+        pprintf(pp, "Expr(");
+        _expr_unop(pp, expr);
+        pprintf(pp, ")");
         break;
 
     case Ast_Expr_AssignOp:

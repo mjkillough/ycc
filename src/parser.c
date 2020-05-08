@@ -84,12 +84,32 @@ parse_result_t parse_expr_primary(state_t *state, ast_expr_t *expr) {
     return ok();
 }
 
-// <expr-unary> = - <expr-primary>
+// <expr-unary> =   - <expr-primary>
+//                | & <expr-primary>
+//                |   <expr-primary>
 parse_result_t parse_expr_unary(state_t *state, ast_expr_t *expr) {
-    if (!punctuator(state, Punctuator_Minus)) {
+    struct unop {
+        token_punctuator_t punctuator;
+        ast_unop_t unop;
+    };
+
+    struct unop ops[] = {
+        {Punctuator_Minus, Ast_UnOp_Negation},
+        {Punctuator_Ampersand, Ast_UnOp_AddressOf},
+    };
+    size_t num_ops = sizeof(ops) / sizeof(ops[0]);
+
+    struct unop *op = NULL;
+    for (size_t i = 0; i < num_ops; i++) {
+        if (punctuator(state, ops[i].punctuator)) {
+            advance(state);
+            op = &ops[i];
+        }
+    }
+
+    if (op == NULL) {
         return parse_expr_primary(state, expr);
     }
-    advance(state);
 
     parse_result_t result;
     if (iserror(result = parse_expr_primary(state, expr))) {
@@ -101,7 +121,7 @@ parse_result_t parse_expr_unary(state_t *state, ast_expr_t *expr) {
 
     *expr = (ast_expr_t){
         .discrim = Ast_Expr_UnOp,
-        .unop = Ast_UnOp_Negation,
+        .unop = op->unop,
         .lhs = inner,
     };
 

@@ -40,6 +40,11 @@ PARSER_TEST(binops, "int main() {\n"
                     "int j = 1 >= 2;\n"
                     "}")
 
+PARSER_TEST(unops, "int main(){\n"
+                   "int a = -1;\n"
+                   "int *b = &a;\n"
+                   "}")
+
 PARSER_TEST(decl, "int main() {\n"
                   "int a = 0;\n"
                   "int *b = 0;\n"

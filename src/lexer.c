@@ -131,7 +131,7 @@ static bool lexer_identifier_or_keyword(lexer_state_t *state, token_t *next) {
 static bool ispunctuation(char c) {
     return c == '(' || c == ')' || c == '{' || c == '}' || c == ';' ||
            c == '+' || c == '-' || c == '*' || c == '/' || c == '=' ||
-           c == '>' || c == '<' || c == '!';
+           c == '>' || c == '<' || c == '!' || c == '&';
 }
 
 static struct {
@@ -149,6 +149,7 @@ static struct {
     {Punctuator_ForwardSlashAssign, "/=", 2},
 
     {Punctuator_Assign, "=", 1},
+    {Punctuator_Ampersand, "&", 1},
     {Punctuator_GreaterThan, ">", 1},
     {Punctuator_LessThan, "<", 1},
     {Punctuator_OpenBrace, "{", 1},

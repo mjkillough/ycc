@@ -28,6 +28,8 @@ typedef enum {
 typedef enum {
     Punctuator_Semicolon,
 
+    Punctuator_Ampersand,
+
     Punctuator_Assign,
     Punctuator_PlusAssign,
     Punctuator_MinusAssign,

@@ -39,9 +39,9 @@ int main() {
         return -1;
     }
 
-    struct tycheck *tyc = tycheck_new();
-    tycheck_check(tyc, &program);
-    tycheck_free(tyc);
+    /* struct tycheck *tyc = tycheck_new(); */
+    /* tycheck_check(tyc, &program); */
+    /* tycheck_free(tyc); */
 
     printf("---\n\n");
     printf("Source:\n");

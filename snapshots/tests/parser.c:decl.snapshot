@@ -1,4 +1,4 @@
 Function(name=main, Block(
-    Statement(Decl(int, a, 0)), 
-    Statement(Decl(int*, b, 0))
+    Statement(Decl(int, a, = 0)), 
+    Statement(Decl(int, * b, = 0))
 ))

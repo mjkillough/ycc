@@ -59,12 +59,6 @@ typedef struct ast_expr_t {
 
 struct ast_block_t;
 
-struct decl {
-    struct ty ty;
-    const char *identifier;
-    struct ast_expr_t *expr;
-};
-
 typedef struct ast_statement_t {
     enum {
         Ast_Statement_Return,
@@ -72,9 +66,10 @@ typedef struct ast_statement_t {
         Ast_Statement_If,
         Ast_Statement_Block,
         Ast_Statement_Expr,
+
     } kind;
     // Ast_Statement_Decl:
-    struct decl *decl;
+    struct ast_declaration *decl;
     // Ast_Statement_Return, Ast_Statement_Decl, Ast_Statement_Expr,
     // Ast_Statement_If:
     ast_expr_t *expr;
@@ -104,4 +99,52 @@ void ast_pprint_statement(struct pprint *pp, ast_statement_t *statment);
 void ast_pprint_block(struct pprint *pp, ast_block_t *block);
 void ast_pprint_function(struct pprint *pp, ast_function_t *func);
 void ast_pprint_program(struct pprint *pp, ast_program_t *prog);
+
+enum ast_basic_type {
+    Ast_BasicType_Int,
+};
+
+struct ast_declarator {
+    enum {
+        Ast_Declarator_Pointer,
+        Ast_Declarator_Ident,
+    } kind;
+    union {
+        // Ast_Declarator_Ident:
+        const char *ident;
+        // Ast_Declarator_Pointer:
+        struct ast_declarator *next;
+    };
+};
+
+// This is more like `declaration-specifiers` in the grammar.
+struct ast_type {
+    enum {
+        Ast_Type_BasicType,
+        // Ast_Type_Struct,
+    } kind;
+    union {
+        // Ast_DeclSpecifier_BasicType:
+        enum ast_basic_type basic;
+        // Ast_DeclSpecifier_Struct:
+        /* struct { */
+        /*     // Identifier, optional: */
+        /*     const char *ident; */
+        /*     struct ast_type *specifier; */
+        /*     struct ast_declarator *declarator; */
+        /* }; */
+    };
+    struct ast_decl_specifier *next;
+};
+
+struct ast_declaration {
+    struct ast_type type;
+    struct ast_declarator declarator;
+    // Optional:
+    ast_expr_t *expr;
+};
+
+void ast_pprint_declarator(struct pprint *pp, struct ast_declarator *decl);
+void ast_pprint_type(struct pprint *pp, struct ast_type *ty);
+void ast_pprint_declaration(struct pprint *pp, struct ast_declaration *decl);
 

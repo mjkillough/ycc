@@ -26,32 +26,35 @@ struct tycheck *tycheck_new() {
 void tycheck_free(struct tycheck *tyc) { free(tyc); }
 
 static void tycheck_statement(struct tycheck *tyc, ast_statement_t *stmt) {
-    switch (stmt->kind) {
-    case Ast_Statement_Decl:
-        // TODO: Check for redefinition.
-        // TODO: Check type of expr.
-        map_insert(tyc->decls, stmt->decl->identifier, &stmt->decl->ty);
-        break;
-    case Ast_Statement_Expr:
-        // TODO: Actually check type of expr too.
-        if (stmt->expr->discrim == Ast_Expr_AssignOp) {
-            // XXX: Assume lhs and rhs are Var()
-            if (stmt->expr->lhs->discrim == Ast_Expr_Var &&
-                stmt->expr->rhs->discrim == Ast_Expr_Var) {
-                const char *ident1 = stmt->expr->lhs->str;
-                const char *ident2 = stmt->expr->rhs->str;
+    UNUSED(tyc);
+    UNUSED(stmt);
 
-                struct ty *ty1 = (struct ty *)map_get(tyc->decls, ident1);
-                struct ty *ty2 = (struct ty *)map_get(tyc->decls, ident2);
-                if (ty1 != NULL && ty2 != NULL) {
-                    if (!ty_compatible(ty1, ty2)) {
-                        printf("incompatible types!\n");
-                    }
-                }
-            }
-        }
-        break;
-    }
+    /* switch (stmt->kind) { */
+    /* case Ast_Statement_Decl: */
+    /*     // TODO: Check for redefinition. */
+    /*     // TODO: Check type of expr. */
+    /*     map_insert(tyc->decls, stmt->decl->identifier, &stmt->decl->ty); */
+    /*     break; */
+    /* case Ast_Statement_Expr: */
+    /*     // TODO: Actually check type of expr too. */
+    /*     if (stmt->expr->discrim == Ast_Expr_AssignOp) { */
+    /*         // XXX: Assume lhs and rhs are Var() */
+    /*         if (stmt->expr->lhs->discrim == Ast_Expr_Var && */
+    /*             stmt->expr->rhs->discrim == Ast_Expr_Var) { */
+    /*             const char *ident1 = stmt->expr->lhs->str; */
+    /*             const char *ident2 = stmt->expr->rhs->str; */
+
+    /*             struct ty *ty1 = (struct ty *)map_get(tyc->decls, ident1); */
+    /*             struct ty *ty2 = (struct ty *)map_get(tyc->decls, ident2); */
+    /*             if (ty1 != NULL && ty2 != NULL) { */
+    /*                 if (!ty_compatible(ty1, ty2)) { */
+    /*                     printf("incompatible types!\n"); */
+    /*                 } */
+    /*             } */
+    /*         } */
+    /*     } */
+    /*     break; */
+    /* } */
 }
 
 static void tycheck_function(struct tycheck *tyc, ast_function_t *func) {

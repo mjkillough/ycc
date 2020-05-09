@@ -318,23 +318,21 @@ parse_result_t parse_statement(state_t *state, ast_statement_t *statement) {
             return result;
         }
 
-        struct decl *decl = (struct decl *)malloc(sizeof(struct decl));
-        if (!ptr) {
-            decl->ty = (struct ty){
-                .kind = Ty_Basic,
-                .basic = BasicTy_Int,
-            };
-        } else {
-            struct ty *inner = (struct ty *)malloc(sizeof(struct ty));
-            inner->kind = Ty_Basic;
-            inner->basic = BasicTy_Int;
+        struct ast_declaration *decl = malloc(sizeof(struct ast_declaration));
 
-            decl->ty = (struct ty){
-                .kind = Ty_Pointer,
-                .inner = inner,
-            };
+        decl->type.kind = Ast_Type_BasicType;
+        decl->type.basic = Ast_BasicType_Int;
+
+        if (!ptr) {
+            decl->declarator.kind = Ast_Declarator_Ident;
+            decl->declarator.ident = ident;
+        } else {
+            decl->declarator.kind = Ast_Declarator_Pointer;
+            decl->declarator.next = malloc(sizeof(struct ast_declarator));
+            decl->declarator.next->kind = Ast_Declarator_Ident;
+            decl->declarator.next->ident = ident;
         }
-        decl->identifier = ident;
+
         decl->expr = expr;
 
         *statement = (ast_statement_t){

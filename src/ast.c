@@ -122,11 +122,7 @@ void ast_pprint_statement(struct pprint *pp, ast_statement_t *stmt) {
         break;
 
     case Ast_Statement_Decl:
-        pprintf(pp, "Decl(");
-        ty_pprint(pp, &stmt->decl->ty);
-        pprintf(pp, ", %s, ", stmt->decl->identifier);
-        ast_pprint_expr(pp, stmt->decl->expr);
-        pprintf(pp, ")");
+        ast_pprint_declaration(pp, stmt->decl);
         break;
 
     case Ast_Statement_If:
@@ -193,3 +189,48 @@ static bool ast_pprint_function_iter(void *context, const char *key,
 void ast_pprint_program(struct pprint *pp, ast_program_t *prog) {
     map_iter(prog->functions, pp, &ast_pprint_function_iter);
 }
+
+void ast_pprint_declarator(struct pprint *pp, struct ast_declarator *decl) {
+    switch (decl->kind) {
+    case Ast_Declarator_Pointer:
+        pprintf(pp, " *");
+        ast_pprint_declarator(pp, decl->next);
+        break;
+    case Ast_Declarator_Ident:
+        pprintf(pp, " %s", decl->ident);
+        break;
+    }
+}
+
+static const char *_basic_type(enum ast_basic_type ty) {
+    switch (ty) {
+    case Ast_BasicType_Int:
+        return "int";
+    }
+}
+
+void ast_pprint_type(struct pprint *pp, struct ast_type *ty) {
+    switch (ty->kind) {
+    case Ast_Type_BasicType:
+        pprintf(pp, _basic_type(ty->basic));
+        break;
+
+        // case Ast_Type_Struct:
+        //    break;
+    }
+}
+
+void ast_pprint_declaration(struct pprint *pp, struct ast_declaration *decl) {
+    pprintf(pp, "Decl(");
+    ast_pprint_type(pp, &decl->type);
+    pprintf(pp, ",");
+    ast_pprint_declarator(pp, &decl->declarator);
+
+    if (decl->expr != NULL) {
+        pprintf(pp, ", = ");
+        ast_pprint_expr(pp, decl->expr);
+    }
+
+    pprintf(pp, ")");
+}
+

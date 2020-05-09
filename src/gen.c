@@ -145,6 +145,15 @@ static bool gen_expr(FILE *f, state_t *state, ast_expr_t *expr) {
 
 static bool gen_block(FILE *f, state_t *state, ast_block_t *block);
 
+static const char *_declarator_ident(struct ast_declarator *declarator) {
+    switch (declarator->kind) {
+    case Ast_Declarator_Pointer:
+        return _declarator_ident(declarator->next);
+    case Ast_Declarator_Ident:
+        return declarator->ident;
+    }
+}
+
 static bool gen_statement(FILE *f, state_t *state, ast_statement_t *stmt) {
     switch (stmt->kind) {
     case Ast_Statement_Return:
@@ -156,7 +165,7 @@ static bool gen_statement(FILE *f, state_t *state, ast_statement_t *stmt) {
     case Ast_Statement_Decl:
         gen_expr(f, state, stmt->decl->expr);
         fprintf(f, "pushq %%rax\n");
-        map_insert(state->env, stmt->decl->identifier,
+        map_insert(state->env, _declarator_ident(&stmt->decl->declarator),
                    (void *)state->stack_idx);
         state->stack_idx += 8;
         break;

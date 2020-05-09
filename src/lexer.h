@@ -23,6 +23,7 @@ typedef enum {
     Keyword_return,
     Keyword_if,
     Keyword_else,
+    Keyword_struct,
 } token_keyword_t;
 
 typedef enum {

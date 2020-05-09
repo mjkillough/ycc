@@ -352,19 +352,124 @@ parse_result_t parse_statement(state_t *state, ast_statement_t *statement) {
     return ok();
 }
 
-/* struct ast_block_item { */
-/*     enum { */
-/*         Ast_BlockItem_Declaration, */
-/*         Ast_BlockItem_Statement, */
-/*     } kind; */
-/*     union { */
-/*         ast_statement_t stmt; */
-/*         struct ast_declaration decl; */
-/*     }; */
-/* }; */
+parse_result_t parse_type(state_t *state, struct ast_type *type);
+
+// TODO: SHould this be shared between parse_declaration and
+// parse_struct_declaration, given that the former allows an expr?
+parse_result_t parse_declarator(state_t *state, struct ast_declarator *decl) {
+    bool ptr = false;
+    if (punctuator(state, Punctuator_Asterisk)) {
+        advance(state);
+        ptr = true;
+    }
+
+    const char *ident;
+    if (!identifier(state, &ident)) {
+        return error(state, "expected identifier");
+    }
+    advance(state);
+
+    if (!ptr) {
+        decl->kind = Ast_Declarator_Ident;
+        decl->ident = ident;
+    } else {
+        decl->kind = Ast_Declarator_Pointer;
+        decl->next = malloc(sizeof(struct ast_declarator));
+        decl->next->kind = Ast_Declarator_Ident;
+        decl->next->ident = ident;
+    }
+
+    return ok();
+}
+
+// XXX: There's a lot of similarity with parse_declaration, although structs
+// will eventually allow bitfields. Considers collapsing.
+parse_result_t parse_struct_declaration(state_t *state,
+                                        struct ast_struct_declaration *decl) {
+    parse_result_t result = {0};
+    if (iserror(result = parse_type(state, &decl->type))) {
+        return result;
+    }
+
+    // TODO: pointer declarators.
+    struct vec *declarators = vec_new(sizeof(struct ast_declarator));
+
+    while (true) {
+        struct ast_declarator decl = {0};
+        if (iserror(result = parse_declarator(state, &decl))) {
+            return result;
+        }
+
+        vec_append(declarators, &decl);
+
+        if (!punctuator(state, Punctuator_Comma)) {
+            break;
+        }
+        advance(state);
+    }
+
+    if (!punctuator(state, Punctuator_Semicolon)) {
+        return error(state, "expected semicolon");
+    }
+    advance(state);
+
+    decl->ndeclarators = vec_into_raw(declarators, (void **)&decl->declarators);
+
+    return ok();
+}
+
+parse_result_t parse_type_struct(state_t *state, struct ast_type *type) {
+    advance(state);
+
+    // TODO: optional identifier
+
+    if (!punctuator(state, Punctuator_OpenBrace)) {
+        return error(state, "expected opening brace");
+    }
+    advance(state);
+
+    struct vec *declarations = vec_new(sizeof(struct ast_struct_declaration));
+
+    while (!punctuator(state, Punctuator_CloseBrace)) {
+        struct ast_struct_declaration decl = {0};
+        parse_result_t result = {0};
+        if (iserror(result = parse_struct_declaration(state, &decl))) {
+            return result;
+        }
+
+        vec_append(declarations, &decl);
+    }
+    advance(state);
+
+    type->kind = Ast_Type_Struct;
+    type->ndeclarations =
+        vec_into_raw(declarations, (void **)&type->declarations);
+
+    return ok();
+}
+
+parse_result_t parse_type(state_t *state, struct ast_type *type) {
+    if (keyword(state, Keyword_int)) {
+        advance(state);
+
+        type->kind = Ast_Type_BasicType;
+        type->basic = Ast_BasicType_Int;
+
+        return ok();
+    }
+
+    if (keyword(state, Keyword_struct)) {
+        return parse_type_struct(state, type);
+    }
+
+    return error(state, "expected int or struct");
+}
 
 parse_result_t parse_declaration(state_t *state, struct ast_declaration *decl) {
-    advance(state);
+    parse_result_t result = {0};
+    if (iserror(result = parse_type(state, &decl->type))) {
+        return result;
+    }
 
     bool ptr = false;
     if (punctuator(state, Punctuator_Asterisk)) {
@@ -384,13 +489,9 @@ parse_result_t parse_declaration(state_t *state, struct ast_declaration *decl) {
     advance(state);
 
     ast_expr_t *expr = (ast_expr_t *)malloc(sizeof(ast_expr_t));
-    parse_result_t result;
     if (iserror(result = parse_expr(state, expr))) {
         return result;
     }
-
-    decl->type.kind = Ast_Type_BasicType;
-    decl->type.basic = Ast_BasicType_Int;
 
     if (!ptr) {
         decl->declarator.kind = Ast_Declarator_Ident;
@@ -415,7 +516,8 @@ parse_result_t parse_declaration(state_t *state, struct ast_declaration *decl) {
 parse_result_t parse_block_item(state_t *state, struct ast_block_item *item){
     parse_result_t result = {0};
 
-    bool is_type = keyword(state, Keyword_int);
+    bool is_type =
+        keyword(state, Keyword_int) || keyword(state, Keyword_struct);
     if (is_type) {
         item->kind = Ast_BlockItem_Declaration;
         if (iserror(result = parse_declaration(state, &item->decl))) {

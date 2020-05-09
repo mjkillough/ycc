@@ -1,0 +1,15 @@
+Function(name=main, Block(
+    Decl(Struct(_, [
+        Decl(int, [
+             j,
+             * k,
+        ]),
+        Decl(int, m),
+    , n, = 0), 
+    Decl(Struct(_, [
+        Decl(Struct(_, [
+            Decl(int, j),
+        , k),
+        Decl(int, m),
+    , n, = 0)
+))

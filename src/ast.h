@@ -113,24 +113,33 @@ struct ast_declarator {
     };
 };
 
+struct ast_struct_declaration;
+
 // This is more like `declaration-specifiers` in the grammar.
 struct ast_type {
     enum {
         Ast_Type_BasicType,
-        // Ast_Type_Struct,
+        Ast_Type_Struct,
     } kind;
     union {
         // Ast_DeclSpecifier_BasicType:
         enum ast_basic_type basic;
         // Ast_DeclSpecifier_Struct:
-        /* struct { */
-        /*     // Identifier, optional: */
-        /*     const char *ident; */
-        /*     struct ast_type *specifier; */
-        /*     struct ast_declarator *declarator; */
-        /* }; */
+        struct {
+            // Identifier, optional:
+            const char *ident;
+            struct ast_struct_declaration *declarations;
+            size_t ndeclarations;
+        };
     };
-    struct ast_decl_specifier *next;
+};
+
+// aka. a struct "field"
+struct ast_struct_declaration {
+    struct ast_type type;
+    // Optional:
+    struct ast_declarator *declarators;
+    size_t ndeclarators;
 };
 
 struct ast_declaration {
@@ -141,6 +150,8 @@ struct ast_declaration {
 };
 
 void ast_pprint_declarator(struct pprint *pp, struct ast_declarator *decl);
+void ast_pprint_struct_declaration(struct pprint *pp,
+                                   struct ast_struct_declaration *decl);
 void ast_pprint_type(struct pprint *pp, struct ast_type *ty);
 void ast_pprint_declaration(struct pprint *pp, struct ast_declaration *decl);
 

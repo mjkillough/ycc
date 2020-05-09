@@ -205,11 +205,57 @@ void ast_pprint_declarator(struct pprint *pp, struct ast_declarator *decl) {
     }
 }
 
+void ast_pprint_struct_declaration(struct pprint *pp,
+                                   struct ast_struct_declaration *decl) {
+    pprintf(pp, "Decl(");
+    ast_pprint_type(pp, &decl->type);
+    pprintf(pp, ",");
+
+    if (decl->ndeclarators > 1) {
+        pprintf(pp, " [");
+        pprint_newline(pp);
+        pprint_indent(pp);
+    }
+
+    for (size_t i = 0; i < decl->ndeclarators; i++) {
+        ast_pprint_declarator(pp, &decl->declarators[i]);
+
+        if (decl->ndeclarators > 1) {
+            pprintf(pp, ",");
+            pprint_newline(pp);
+        }
+    }
+
+    if (decl->ndeclarators > 1) {
+        pprint_unindent(pp);
+        pprintf(pp, "]");
+    }
+
+    pprintf(pp, ")");
+}
+
 static const char *_basic_type(enum ast_basic_type ty) {
     switch (ty) {
     case Ast_BasicType_Int:
         return "int";
     }
+}
+
+static void ast_pprint_struct(struct pprint *pp, struct ast_type *ty) {
+    // TODO: Support identifier.
+
+    pprintf(pp, "Struct(_, [");
+    pprint_newline(pp);
+    pprint_indent(pp);
+
+    for (size_t i = 0; i < ty->ndeclarations; i++) {
+        ast_pprint_struct_declaration(pp, &ty->declarations[i]);
+
+        pprintf(pp, ",");
+        pprint_newline(pp);
+    }
+
+    pprint_unindent(pp);
 }
 
 void ast_pprint_type(struct pprint *pp, struct ast_type *ty) {
@@ -218,8 +264,9 @@ void ast_pprint_type(struct pprint *pp, struct ast_type *ty) {
         pprintf(pp, _basic_type(ty->basic));
         break;
 
-        // case Ast_Type_Struct:
-        //    break;
+    case Ast_Type_Struct:
+        ast_pprint_struct(pp, ty);
+        break;
     }
 }
 

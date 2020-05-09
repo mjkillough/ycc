@@ -51,6 +51,11 @@ PARSER_TEST(decl, "int main() {\n"
                   "int *b = 0;\n"
                   "}")
 
+PARSER_TEST(struct_decl, "int main() {\n"
+                         "struct { int j, *k; int m; } n = 0;\n"
+                         "struct { struct { int j; } k; int m; } n = 0;\n"
+                         "}")
+
 PARSER_TEST(assignops, "int main() {\n"
                        "a  = 0;\n"
                        "b += 1;\n"

@@ -20,7 +20,8 @@ static void lsnapshotter(FILE *f, void *data) {
 #define LEXER_TEST(name, prog)                                                 \
     TEST(name) { SNAPSHOT(&lsnapshotter, prog); }
 
-LEXER_TEST(punctuator, "; ,\n"
+LEXER_TEST(punctuator, ".\n"
+                       "; ,\n"
                        "&\n"
                        "= += -= *= /=\n"
                        "== != > >= < <=\n"

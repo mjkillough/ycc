@@ -129,7 +129,7 @@ static bool lexer_identifier_or_keyword(lexer_state_t *state, token_t *next) {
 static bool ispunctuation(char c) {
     return c == '(' || c == ')' || c == '{' || c == '}' || c == ';' ||
            c == '+' || c == '-' || c == '*' || c == '/' || c == '=' ||
-           c == '>' || c == '<' || c == '!' || c == '&' || c == ',';
+           c == '>' || c == '<' || c == '!' || c == '&' || c == ',' || c == '.';
 }
 
 static struct {
@@ -160,6 +160,7 @@ static struct {
     {Punctuator_Minus, "-", 1},
     {Punctuator_Asterisk, "*", 1},
     {Punctuator_ForwardSlash, "/", 1},
+    {Punctuator_Period, ".", 1},
 };
 
 static const char *punctuator_as_string(token_punctuator_t p) {

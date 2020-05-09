@@ -27,6 +27,8 @@ typedef enum {
 } token_keyword_t;
 
 typedef enum {
+    Punctuator_Period,
+
     Punctuator_Semicolon,
     Punctuator_Comma,
 

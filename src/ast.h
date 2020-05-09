@@ -62,14 +62,11 @@ struct ast_block_t;
 typedef struct ast_statement_t {
     enum {
         Ast_Statement_Return,
-        Ast_Statement_Decl,
         Ast_Statement_If,
         Ast_Statement_Block,
         Ast_Statement_Expr,
 
     } kind;
-    // Ast_Statement_Decl:
-    struct ast_declaration *decl;
     // Ast_Statement_Return, Ast_Statement_Decl, Ast_Statement_Expr,
     // Ast_Statement_If:
     ast_expr_t *expr;
@@ -80,9 +77,8 @@ typedef struct ast_statement_t {
 } ast_statement_t;
 
 typedef struct ast_block_t {
-    ast_statement_t *stmts;
-    size_t count;
-    size_t capacity;
+    struct ast_block_item *items;
+    size_t nitems;
 } ast_block_t;
 
 typedef struct {
@@ -147,4 +143,15 @@ struct ast_declaration {
 void ast_pprint_declarator(struct pprint *pp, struct ast_declarator *decl);
 void ast_pprint_type(struct pprint *pp, struct ast_type *ty);
 void ast_pprint_declaration(struct pprint *pp, struct ast_declaration *decl);
+
+struct ast_block_item {
+    enum {
+        Ast_BlockItem_Declaration,
+        Ast_BlockItem_Statement,
+    } kind;
+    union {
+        ast_statement_t stmt;
+        struct ast_declaration decl;
+    };
+};
 

@@ -7,6 +7,7 @@
 #include "map.h"
 #include "parser.h"
 #include "ty.h"
+#include "vec.h"
 
 typedef struct {
     const char *prog;
@@ -48,19 +49,6 @@ static bool identifier(state_t *state, const char **str) {
         return true;
     }
     return false;
-}
-
-static void block_add_statement(ast_block_t *block, ast_statement_t stmt) {
-    if (block->capacity == 0) {
-        block->stmts = calloc(1, sizeof(ast_statement_t));
-        block->capacity = 1;
-    } else if (block->capacity - block->count == 0) {
-        block->capacity *= 2;
-        block->stmts =
-            realloc(block->stmts, block->capacity * sizeof(ast_statement_t));
-    }
-
-    block->stmts[block->count++] = stmt;
 }
 
 // <expr-primary> = <constant>
@@ -292,58 +280,6 @@ parse_result_t parse_statement(state_t *state, ast_statement_t *statement) {
             return error(state, "expected semicolon");
         }
         advance(state);
-    } else if (keyword(state, Keyword_int)) {
-        advance(state);
-
-        bool ptr = false;
-        if (punctuator(state, Punctuator_Asterisk)) {
-            advance(state);
-            ptr = true;
-        }
-
-        const char *ident;
-        if (!identifier(state, &ident)) {
-            return error(state, "expected identifier");
-        }
-        advance(state);
-
-        if (!punctuator(state, Punctuator_Assign)) {
-            return error(state, "expected =");
-        }
-        advance(state);
-
-        ast_expr_t *expr = (ast_expr_t *)malloc(sizeof(ast_expr_t));
-        parse_result_t result;
-        if (iserror(result = parse_expr(state, expr))) {
-            return result;
-        }
-
-        struct ast_declaration *decl = malloc(sizeof(struct ast_declaration));
-
-        decl->type.kind = Ast_Type_BasicType;
-        decl->type.basic = Ast_BasicType_Int;
-
-        if (!ptr) {
-            decl->declarator.kind = Ast_Declarator_Ident;
-            decl->declarator.ident = ident;
-        } else {
-            decl->declarator.kind = Ast_Declarator_Pointer;
-            decl->declarator.next = malloc(sizeof(struct ast_declarator));
-            decl->declarator.next->kind = Ast_Declarator_Ident;
-            decl->declarator.next->ident = ident;
-        }
-
-        decl->expr = expr;
-
-        *statement = (ast_statement_t){
-            .kind = Ast_Statement_Decl,
-            .decl = decl,
-        };
-
-        if (!punctuator(state, Punctuator_Semicolon)) {
-            return error(state, "expected semicolon");
-        }
-        advance(state);
     } else if (keyword(state, Keyword_if)) {
         advance(state);
 
@@ -416,6 +352,86 @@ parse_result_t parse_statement(state_t *state, ast_statement_t *statement) {
     return ok();
 }
 
+/* struct ast_block_item { */
+/*     enum { */
+/*         Ast_BlockItem_Declaration, */
+/*         Ast_BlockItem_Statement, */
+/*     } kind; */
+/*     union { */
+/*         ast_statement_t stmt; */
+/*         struct ast_declaration decl; */
+/*     }; */
+/* }; */
+
+parse_result_t parse_declaration(state_t *state, struct ast_declaration *decl) {
+    advance(state);
+
+    bool ptr = false;
+    if (punctuator(state, Punctuator_Asterisk)) {
+        advance(state);
+        ptr = true;
+    }
+
+    const char *ident;
+    if (!identifier(state, &ident)) {
+        return error(state, "expected identifier");
+    }
+    advance(state);
+
+    if (!punctuator(state, Punctuator_Assign)) {
+        return error(state, "expected =");
+    }
+    advance(state);
+
+    ast_expr_t *expr = (ast_expr_t *)malloc(sizeof(ast_expr_t));
+    parse_result_t result;
+    if (iserror(result = parse_expr(state, expr))) {
+        return result;
+    }
+
+    decl->type.kind = Ast_Type_BasicType;
+    decl->type.basic = Ast_BasicType_Int;
+
+    if (!ptr) {
+        decl->declarator.kind = Ast_Declarator_Ident;
+        decl->declarator.ident = ident;
+    } else {
+        decl->declarator.kind = Ast_Declarator_Pointer;
+        decl->declarator.next = malloc(sizeof(struct ast_declarator));
+        decl->declarator.next->kind = Ast_Declarator_Ident;
+        decl->declarator.next->ident = ident;
+    }
+
+    decl->expr = expr;
+
+    if (!punctuator(state, Punctuator_Semicolon)) {
+        return error(state, "expected semicolon");
+    }
+    advance(state);
+
+    return ok();
+}
+
+parse_result_t parse_block_item(state_t *state, struct ast_block_item *item){
+    parse_result_t result = {0};
+
+    bool is_type = keyword(state, Keyword_int);
+    if (is_type) {
+        item->kind = Ast_BlockItem_Declaration;
+        if (iserror(result = parse_declaration(state, &item->decl))) {
+            return result;
+        }
+        return ok();
+    }
+
+    item->kind = Ast_BlockItem_Statement;
+    if (iserror(result = parse_statement(state, &item->stmt))) {
+        return result;
+    }
+
+    return ok();
+}
+
 // <block> ::= { <statement> }
 parse_result_t parse_block(state_t *state, ast_block_t *block) {
     if (!punctuator(state, Punctuator_OpenBrace)) {
@@ -423,16 +439,19 @@ parse_result_t parse_block(state_t *state, ast_block_t *block) {
     }
     advance(state);
 
+    struct vec *items = vec_new(sizeof(struct ast_block_item));
+
     while (!punctuator(state, Punctuator_CloseBrace)) {
-        ast_statement_t statement = {0};
+        struct ast_block_item item = {0};
         parse_result_t result = {0};
-        if (iserror(result = parse_statement(state, &statement))) {
+        if (iserror(result = parse_block_item(state, &item))) {
             return result;
         }
-
-        block_add_statement(block, statement);
+        vec_append(items, &item);
     }
     advance(state);
+
+    block->nitems = vec_into_raw(items, (void **)&block->items);
 
     return ok();
 }

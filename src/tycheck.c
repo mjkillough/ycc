@@ -58,8 +58,9 @@ static void tycheck_statement(struct tycheck *tyc, ast_statement_t *stmt) {
 }
 
 static void tycheck_function(struct tycheck *tyc, ast_function_t *func) {
-    for (size_t i = 0; i < func->block.count; i++) {
-        tycheck_statement(tyc, &func->block.stmts[i]);
+    for (size_t i = 0; i < func->block.nitems; i++) {
+        // XXX: Declaration or Statement!
+        tycheck_statement(tyc, &func->block.items[i].stmt);
     }
 }
 

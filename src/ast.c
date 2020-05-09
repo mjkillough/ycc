@@ -121,10 +121,6 @@ void ast_pprint_statement(struct pprint *pp, ast_statement_t *stmt) {
         pprintf(pp, ")");
         break;
 
-    case Ast_Statement_Decl:
-        ast_pprint_declaration(pp, stmt->decl);
-        break;
-
     case Ast_Statement_If:
         pprintf(pp, "If(");
         ast_pprint_expr(pp, stmt->expr);
@@ -153,14 +149,21 @@ void ast_pprint_block(struct pprint *pp, ast_block_t *block) {
     pprintf(pp, "Block(");
 
     pprint_indent(pp);
-    if (block->count > 0) {
+    if (block->nitems > 0) {
         pprint_newline(pp);
     }
 
-    for (size_t i = 0; i < block->count; i++) {
-        ast_pprint_statement(pp, &block->stmts[i]);
+    for (size_t i = 0; i < block->nitems; i++) {
+        switch (block->items[i].kind) {
+        case Ast_BlockItem_Statement:
+            ast_pprint_statement(pp, &block->items[i].stmt);
+            break;
+        case Ast_BlockItem_Declaration:
+            ast_pprint_declaration(pp, &block->items[i].decl);
+            break;
+        }
 
-        if (i < block->count - 1) {
+        if (i < block->nitems - 1) {
             pprintf(pp, ", ");
         }
         pprint_newline(pp);

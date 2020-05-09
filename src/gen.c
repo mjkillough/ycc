@@ -162,13 +162,6 @@ static bool gen_statement(FILE *f, state_t *state, ast_statement_t *stmt) {
         fprintf(f, "popq %%rbp\n");
         fprintf(f, "ret\n");
         break;
-    case Ast_Statement_Decl:
-        gen_expr(f, state, stmt->decl->expr);
-        fprintf(f, "pushq %%rax\n");
-        map_insert(state->env, _declarator_ident(&stmt->decl->declarator),
-                   (void *)state->stack_idx);
-        state->stack_idx += 8;
-        break;
     case Ast_Statement_If:
         gen_expr(f, state, stmt->expr);
         fprintf(f, "cmp $0, %%rax\n");
@@ -199,10 +192,28 @@ static bool gen_statement(FILE *f, state_t *state, ast_statement_t *stmt) {
     return true;
 }
 
+static bool gen_declaration(FILE *f, state_t *state,
+                            struct ast_declaration *decl) {
+    gen_expr(f, state, decl->expr);
+    fprintf(f, "pushq %%rax\n");
+    map_insert(state->env, _declarator_ident(&decl->declarator),
+               (void *)state->stack_idx);
+    state->stack_idx += 8;
+    return true;
+}
+
 static bool gen_block(FILE *f, state_t *state, ast_block_t *block) {
-    for (size_t i = 0; i < block->count; i++) {
-        gen_statement(f, state, &block->stmts[i]);
+    for (size_t i = 0; i < block->nitems; i++) {
+        switch (block->items[i].kind) {
+        case Ast_BlockItem_Statement:
+            gen_statement(f, state, &block->items[i].stmt);
+            break;
+        case Ast_BlockItem_Declaration:
+            gen_declaration(f, state, &block->items[i].decl);
+            break;
+        }
     }
+
     return true;
 }
 

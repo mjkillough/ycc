@@ -49,6 +49,8 @@ PARSER_TEST(unops, "int main(){\n"
 PARSER_TEST(postfix, "int main() {\n"
                      "int a = b.c;\n"
                      "int d = e.f.g;\n"
+                     "int h = i->j.k;\n"
+                     "int l = m.n->o;\n"
                      "}")
 
 PARSER_TEST(decl, "int main() {\n"

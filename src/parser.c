@@ -84,7 +84,7 @@ parse_result_t parse_expr_postfix(state_t *state, ast_expr_t *expr) {
         }
 
         switch (state->token.punctuator) {
-        case Punctuator_Period:
+        case Punctuator_Period: {
             advance(state);
 
             const char *ident;
@@ -98,10 +98,33 @@ parse_result_t parse_expr_postfix(state_t *state, ast_expr_t *expr) {
 
             *expr = (ast_expr_t){.discrim = Ast_Expr_MemberOf,
                                  .member = {
+                                     .deref = false,
                                      .lhs = lhs,
                                      .ident = ident,
                                  }};
             break;
+        }
+
+        case Punctuator_Arrow: {
+            advance(state);
+
+            const char *ident;
+            if (!identifier(state, &ident)) {
+                return error(state, "expected identifier");
+            }
+            advance(state);
+
+            ast_expr_t *lhs = malloc(sizeof(ast_expr_t));
+            *lhs = *expr;
+
+            *expr = (ast_expr_t){.discrim = Ast_Expr_MemberOf,
+                                 .member = {
+                                     .deref = true,
+                                     .lhs = lhs,
+                                     .ident = ident,
+                                 }};
+            break;
+        }
 
         default:
             return ok();

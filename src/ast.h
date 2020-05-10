@@ -56,12 +56,12 @@ typedef struct ast_expr_t {
         ast_assignop_t assignop;
         // Ast_Expr_MemberOf:
         struct {
+            bool deref;
             struct ast_expr_t *lhs;
             const char *ident;
         } member;
     };
     // Ast_Expr_UnOp, Ast_Expr_Binop, Ast_Expr_Assign:
-    // Ast_Expr_PostfixOp: lhs only
     struct ast_expr_t *lhs, *rhs;
 } ast_expr_t;
 

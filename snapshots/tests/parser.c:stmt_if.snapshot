@@ -1,3 +1,7 @@
 Function(name=main, Block(
-    Statement(If(Expr(1 == 0), Statement(Block()), Statement(Block())))
+    Statement(If(Expr(1 == 0), Statement(Block(
+        Decl(int, i, = 0)
+    )), Statement(Block(
+        Decl(int, j, = 1)
+    ))))
 ))

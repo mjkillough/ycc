@@ -93,9 +93,9 @@ PARSER_TEST(stmt_return, "int main() {\n"
 
 PARSER_TEST(stmt_if, "int main() {\n"
                      "if (1 == 0) {\n"
-                     //"    int i = 0;\n"
+                     "    int i = 0;\n"
                      "} else {\n"
-                     //"    int j = 1;\n"
+                     "    int j = 1;\n"
                      "}\n"
                      "}")
 

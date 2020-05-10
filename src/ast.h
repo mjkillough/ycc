@@ -42,6 +42,8 @@ typedef struct ast_expr_t {
         Ast_Expr_UnOp,
         Ast_Expr_BinOp,
         Ast_Expr_AssignOp,
+        // postfix-expr in grammar:
+        Ast_Expr_MemberOf,
     } discrim;
     union {
         // Ast_Expr_Constant, Ast_Expr_Var:
@@ -52,8 +54,14 @@ typedef struct ast_expr_t {
         ast_binop_t binop;
         // Ast_Expr_AssignOp:
         ast_assignop_t assignop;
+        // Ast_Expr_MemberOf:
+        struct {
+            struct ast_expr_t *lhs;
+            const char *ident;
+        } member;
     };
     // Ast_Expr_UnOp, Ast_Expr_Binop, Ast_Expr_Assign:
+    // Ast_Expr_PostfixOp: lhs only
     struct ast_expr_t *lhs, *rhs;
 } ast_expr_t;
 

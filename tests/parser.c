@@ -46,6 +46,11 @@ PARSER_TEST(unops, "int main(){\n"
                    "int c = *b;\n"
                    "}")
 
+PARSER_TEST(postfix, "int main() {\n"
+                     "int a = b.c;\n"
+                     "int d = e.f.g;\n"
+                     "}")
+
 PARSER_TEST(decl, "int main() {\n"
                   "int a = 0;\n"
                   "int *b = 0;\n"

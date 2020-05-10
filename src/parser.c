@@ -72,6 +72,43 @@ parse_result_t parse_expr_primary(state_t *state, ast_expr_t *expr) {
     return ok();
 }
 
+parse_result_t parse_expr_postfix(state_t *state, ast_expr_t *expr) {
+    parse_result_t result = {0};
+    if (iserror(result = parse_expr_primary(state, expr))) {
+        return result;
+    }
+
+    while (true) {
+        if (state->token.discrim != Token_Punctuator) {
+            return ok();
+        }
+
+        switch (state->token.punctuator) {
+        case Punctuator_Period:
+            advance(state);
+
+            const char *ident;
+            if (!identifier(state, &ident)) {
+                return error(state, "expected identifier");
+            }
+            advance(state);
+
+            ast_expr_t *lhs = malloc(sizeof(ast_expr_t));
+            *lhs = *expr;
+
+            *expr = (ast_expr_t){.discrim = Ast_Expr_MemberOf,
+                                 .member = {
+                                     .lhs = lhs,
+                                     .ident = ident,
+                                 }};
+            break;
+
+        default:
+            return ok();
+        }
+    }
+}
+
 // <expr-unary> =   - <expr-primary>
 //                | & <expr-primary>
 //                |   <expr-primary>
@@ -97,10 +134,12 @@ parse_result_t parse_expr_unary(state_t *state, ast_expr_t *expr) {
     }
 
     if (op == NULL) {
-        return parse_expr_primary(state, expr);
+        return parse_expr_postfix(state, expr);
     }
 
     parse_result_t result;
+    // XXX: This should be cast-expression, but at least it should be
+    // unary-expression to allow !!
     if (iserror(result = parse_expr_primary(state, expr))) {
         return result;
     }

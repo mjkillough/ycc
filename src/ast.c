@@ -108,6 +108,14 @@ void ast_pprint_expr(struct pprint *pp, ast_expr_t *expr) {
         ast_pprint_expr(pp, expr->rhs);
         pprintf(pp, ")");
         break;
+
+    case Ast_Expr_MemberOf:
+        pprintf(pp, "MemberOf(");
+        ast_pprint_expr(pp, expr->member.lhs);
+        pprintf(pp, ", ");
+        pprintf(pp, "%s", expr->member.ident);
+        pprintf(pp, ")");
+        break;
     }
 }
 

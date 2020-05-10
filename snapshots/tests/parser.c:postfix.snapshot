@@ -1,0 +1,6 @@
+Function(name=main, Block(
+    Decl(int, a, = MemberOf(Var(b), c)), 
+    Decl(int, d, = MemberOf(MemberOf(Var(e), f), g)), 
+    Decl(int, h, = MemberOf(MemberOf(*Var(i), j), k)), 
+    Decl(int, l, = MemberOf(*MemberOf(Var(m), n), o))
+))

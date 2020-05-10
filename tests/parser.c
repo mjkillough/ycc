@@ -40,6 +40,18 @@ PARSER_TEST(binops, "int main() {\n"
                     "int j = 1 >= 2;\n"
                     "}")
 
+PARSER_TEST(binops_associativity, "int main() {\n"
+                                  "int a = a + b + c;\n"
+                                  "int b = a * b * c;\n"
+                                  "}")
+
+PARSER_TEST(binops_precedence, "int main() {\n"
+                               "int a = a + b * c;\n"
+                               "int b = a * b + c;\n"
+                               "int c = a * b / c;\n"
+                               "int d = a / b * c;\n"
+                               "}")
+
 PARSER_TEST(unops, "int main(){\n"
                    "int a = -1;\n"
                    "int *b = &a;\n"

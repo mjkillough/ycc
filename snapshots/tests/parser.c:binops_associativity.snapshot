@@ -1,0 +1,4 @@
+Function(name=main, Block(
+    Decl(int, a, = Expr(Expr(Var(a) + Var(b)) + Var(c))), 
+    Decl(int, b, = Expr(Expr(Var(a) * Var(b)) * Var(c)))
+))

@@ -40,6 +40,8 @@ void *vec_get(struct vec *v, size_t idx) {
     return idx_ptr(v, idx);
 }
 
+size_t vec_len(struct vec *v) { return v->count; }
+
 void vec_reserve(struct vec *v, size_t extra_capacity) {
     v->capacity += extra_capacity;
     // TODO: check NULL return

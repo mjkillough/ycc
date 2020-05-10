@@ -254,9 +254,15 @@ static const char *_basic_type(enum ast_basic_type ty) {
 }
 
 static void ast_pprint_struct(struct pprint *pp, struct ast_type *ty) {
-    // TODO: Support identifier.
+    pprintf(pp, "Struct(");
 
-    pprintf(pp, "Struct(_, [");
+    if (ty->ident != NULL) {
+        pprintf(pp, "%s", ident_to_str(ty->ident));
+    } else {
+        pprintf(pp, "_");
+    }
+
+    pprintf(pp, ", [");
     pprint_newline(pp);
     pprint_indent(pp);
 

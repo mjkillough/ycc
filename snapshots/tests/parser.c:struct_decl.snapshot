@@ -11,5 +11,8 @@ Function(name=main, Block(
             Decl(int, j),
         , k),
         Decl(int, m),
-    , n, = 0)
+    , n, = 0), 
+    Decl(Struct(tag, [
+        Decl(int, i),
+    , j, = 0)
 ))

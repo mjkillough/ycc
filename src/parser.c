@@ -485,7 +485,11 @@ parse_result_t parse_struct_declaration(state_t *state,
 parse_result_t parse_type_struct(state_t *state, struct ast_type *type) {
     advance(state);
 
-    // TODO: optional identifier
+    // Identifier (aka. tag) is optional.
+    struct ident *ident = NULL;
+    if (identifier(state, &ident)) {
+        advance(state);
+    }
 
     if (!punctuator(state, Punctuator_OpenBrace)) {
         return error(state, "expected opening brace");
@@ -506,6 +510,7 @@ parse_result_t parse_type_struct(state_t *state, struct ast_type *type) {
     advance(state);
 
     type->kind = Ast_Type_Struct;
+    type->ident = ident;
     type->ndeclarations =
         vec_into_raw(declarations, (void **)&type->declarations);
 

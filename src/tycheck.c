@@ -19,7 +19,7 @@ struct tycheck {
 
 struct tycheck *tycheck_new() {
     struct tycheck *tyc = (struct tycheck *)malloc(sizeof(struct tycheck));
-    tyc->decls = map_new();
+    tyc->decls = map_new(map_key_string);
     return tyc;
 }
 
@@ -64,7 +64,7 @@ static void tycheck_function(struct tycheck *tyc, ast_function_t *func) {
     }
 }
 
-static bool _tycheck_program_iter(void *context, const char *key, void *value) {
+static bool _tycheck_program_iter(void *context, const void *key, void *value) {
     UNUSED(key);
 
     struct tycheck *tyc = (struct tycheck *)context;

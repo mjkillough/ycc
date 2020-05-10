@@ -194,7 +194,7 @@ void ast_pprint_function(struct pprint *pp, ast_function_t *func) {
     pprint_newline(pp);
 }
 
-static bool ast_pprint_function_iter(void *context, const char *key,
+static bool ast_pprint_function_iter(void *context, const void *key,
                                      void *value) {
     UNUSED(key);
     ast_pprint_function((struct pprint *)context, value);

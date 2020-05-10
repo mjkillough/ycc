@@ -220,7 +220,7 @@ static bool gen_block(FILE *f, state_t *state, ast_block_t *block) {
 
 static bool gen_function(FILE *f, ast_function_t *func) {
     state_t state = {
-        .env = map_new(),
+        .env = map_new(map_key_string),
         .stack_idx = 8,
     };
     fprintf(f, " .globl %s\n", ident_to_str(func->ident));
@@ -230,7 +230,7 @@ static bool gen_function(FILE *f, ast_function_t *func) {
     return gen_block(f, &state, &func->block);
 }
 
-static bool gen_function_iter(void *context, const char *key, void *value) {
+static bool gen_function_iter(void *context, const void *key, void *value) {
     FILE *f = context;
     UNUSED(key);
     return gen_function(f, value);

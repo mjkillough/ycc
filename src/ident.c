@@ -21,7 +21,7 @@ struct ident_table {
 
 struct ident_table *ident_table_new() {
     struct ident_table *t = malloc(sizeof(struct ident_table));
-    t->map = map_new();
+    t->map = map_new(map_key_string);
     t->vec = vec_new(sizeof(struct ident *));
     return t;
 }

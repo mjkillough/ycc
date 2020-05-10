@@ -3,6 +3,7 @@
 #include "ast.h"
 #include "diag.h"
 #include "gen.h"
+#include "ident.h"
 #include "lexer.h"
 #include "parser.h"
 #include "tycheck.h"
@@ -32,8 +33,10 @@ int main() {
     // }
     // return 0;
 
+    struct ident_table *idents = ident_table_new();
+
     ast_program_t program;
-    parse_result_t result = parser_parse(prog, &program);
+    parse_result_t result = parser_parse(idents, prog, &program);
     if (result.kind == Parse_Result_Error) {
         diag_print(prog, &result.diag);
         return -1;

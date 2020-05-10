@@ -6,6 +6,7 @@
 #include "ast.h"
 #include "common.h"
 #include "gen.h"
+#include "ident.h"
 #include "map.h"
 
 typedef struct {
@@ -150,7 +151,7 @@ static const char *_declarator_ident(struct ast_declarator *declarator) {
     case Ast_Declarator_Pointer:
         return _declarator_ident(declarator->next);
     case Ast_Declarator_Ident:
-        return declarator->ident;
+        return ident_to_str(declarator->ident);
     }
 }
 
@@ -222,8 +223,8 @@ static bool gen_function(FILE *f, ast_function_t *func) {
         .env = map_new(),
         .stack_idx = 8,
     };
-    fprintf(f, " .globl %s\n", func->name);
-    fprintf(f, "%s:\n", func->name);
+    fprintf(f, " .globl %s\n", ident_to_str(func->ident));
+    fprintf(f, "%s:\n", ident_to_str(func->ident));
     fprintf(f, "pushq %%rbp\n");
     fprintf(f, "mov %%rsp, %%rbp\n");
     return gen_block(f, &state, &func->block);

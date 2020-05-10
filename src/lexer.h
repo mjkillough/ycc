@@ -65,7 +65,9 @@ typedef struct {
     union {
         // Token_Keyword
         token_keyword_t keyword;
-        // Token_Identifier, Token_Constant
+        // Token_Identifier
+        struct ident *ident;
+        // Token_Constant:
         const char *str;
         // Token_Punctuator
         token_punctuator_t punctuator;
@@ -75,6 +77,8 @@ typedef struct {
 
 // TODO: Make this private
 typedef struct {
+    struct ident_table *idents;
+
     const char *prog;
     const char *unlexed;
 
@@ -82,7 +86,7 @@ typedef struct {
     unsigned int character;
 } lexer_state_t;
 
-lexer_state_t lexer_new(const char *prog);
+lexer_state_t lexer_new(struct ident_table *idents, const char *prog);
 bool lexer_next_token(lexer_state_t *state, token_t *next);
 
 void lexer_print_token(FILE *f, token_t tok);

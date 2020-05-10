@@ -46,8 +46,10 @@ typedef struct ast_expr_t {
         Ast_Expr_MemberOf,
     } discrim;
     union {
-        // Ast_Expr_Constant, Ast_Expr_Var:
+        // Ast_Expr_Constant:
         const char *str;
+        // Ast_Expr_Var:
+        struct ident *ident;
         // Ast_Expr_UnOp:
         ast_unop_t unop;
         // Ast_Expr_Binop:
@@ -58,7 +60,7 @@ typedef struct ast_expr_t {
         struct {
             bool deref;
             struct ast_expr_t *lhs;
-            const char *ident;
+            struct ident *ident;
         } member;
     };
     // Ast_Expr_UnOp, Ast_Expr_Binop, Ast_Expr_Assign:
@@ -90,7 +92,7 @@ typedef struct ast_block_t {
 } ast_block_t;
 
 typedef struct {
-    const char *name;
+    struct ident *ident;
     ast_block_t block;
 } ast_function_t;
 
@@ -115,7 +117,7 @@ struct ast_declarator {
     } kind;
     union {
         // Ast_Declarator_Ident:
-        const char *ident;
+        struct ident *ident;
         // Ast_Declarator_Pointer:
         struct ast_declarator *next;
     };
@@ -135,7 +137,7 @@ struct ast_type {
         // Ast_DeclSpecifier_Struct:
         struct {
             // Identifier, optional:
-            const char *ident;
+            struct ident *ident;
             struct ast_struct_declaration *declarations;
             size_t ndeclarations;
         };

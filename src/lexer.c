@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "ident.h"
 #include "lexer.h"
 
 static const struct {
@@ -116,9 +117,12 @@ static bool lexer_identifier_or_keyword(lexer_state_t *state, token_t *next) {
                 char *str = (char *)malloc(len + 1);
                 strlcpy(str, start, len + 1);
 
+                // TODO: ident_from_str does strdup(). Does it need to?
+                struct ident *ident = ident_from_str(state->idents, str);
+
                 *next =
                     (token_t){.discrim = Token_Identifier,
-                              .str = str,
+                              .ident = ident,
                               .span = span(state, start, state->unlexed - 1)};
                 return true;
             }
@@ -212,7 +216,8 @@ void lexer_print_token(FILE *f, token_t tok) {
                 keyword_as_string(tok.keyword));
         break;
     case Token_Identifier:
-        fprintf(f, "Token_Identifier { .str = \"%s\" }\n", tok.str);
+        fprintf(f, "Token_Identifier { .str = \"%s\" }\n",
+                ident_to_str(tok.ident));
         break;
     case Token_Constant:
         fprintf(f, "Token_Constant   { .str = \"%s\" }\n", tok.str);
@@ -224,8 +229,10 @@ void lexer_print_token(FILE *f, token_t tok) {
     }
 }
 
-lexer_state_t lexer_new(const char *prog) {
+lexer_state_t lexer_new(struct ident_table *idents, const char *prog) {
     return (lexer_state_t){
+        .idents = idents,
+
         .prog = prog,
         .unlexed = prog,
 

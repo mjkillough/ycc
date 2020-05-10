@@ -5,13 +5,16 @@
 
 #include "common.h"
 #include "framework.h"
+#include "ident.h"
 #include "snapshot.h"
 
 static void parser_snapshotter(FILE *f, void *data) {
     const char *prog = (const char *)data;
 
+    struct ident_table *idents = ident_table_new();
+
     ast_program_t program;
-    parse_result_t result = parser_parse(prog, &program);
+    parse_result_t result = parser_parse(idents, prog, &program);
     if (result.kind == Parse_Result_Error) {
         diag_print(prog, &result.diag);
         FAIL("FAILED TO PARSE", "");

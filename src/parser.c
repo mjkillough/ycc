@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "ast.h"
+#include "ident.h"
 #include "lexer.h"
 #include "map.h"
 #include "parser.h"
@@ -11,6 +12,7 @@
 
 typedef struct {
     const char *prog;
+    struct ident_table *idents;
     lexer_state_t lexer;
     token_t token;
     bool eof;
@@ -43,9 +45,9 @@ static bool punctuator(state_t *state, token_punctuator_t punctuator) {
            state->token.punctuator == punctuator;
 }
 
-static bool identifier(state_t *state, const char **str) {
+static bool identifier(state_t *state, struct ident **ident) {
     if (state->token.discrim == Token_Identifier) {
-        *str = state->token.str;
+        *ident = state->token.ident;
         return true;
     }
     return false;
@@ -62,7 +64,7 @@ parse_result_t parse_expr_primary(state_t *state, ast_expr_t *expr) {
     } else if (state->token.discrim == Token_Identifier) {
         *expr = (ast_expr_t){
             .discrim = Ast_Expr_Var,
-            .str = state->token.str,
+            .ident = state->token.ident,
         };
         advance(state);
     } else {
@@ -87,7 +89,7 @@ parse_result_t parse_expr_postfix(state_t *state, ast_expr_t *expr) {
         case Punctuator_Period: {
             advance(state);
 
-            const char *ident;
+            struct ident *ident;
             if (!identifier(state, &ident)) {
                 return error(state, "expected identifier");
             }
@@ -108,7 +110,7 @@ parse_result_t parse_expr_postfix(state_t *state, ast_expr_t *expr) {
         case Punctuator_Arrow: {
             advance(state);
 
-            const char *ident;
+            struct ident *ident;
             if (!identifier(state, &ident)) {
                 return error(state, "expected identifier");
             }
@@ -425,7 +427,7 @@ parse_result_t parse_declarator(state_t *state, struct ast_declarator *decl) {
         ptr = true;
     }
 
-    const char *ident;
+    struct ident *ident;
     if (!identifier(state, &ident)) {
         return error(state, "expected identifier");
     }
@@ -539,7 +541,7 @@ parse_result_t parse_declaration(state_t *state, struct ast_declaration *decl) {
         ptr = true;
     }
 
-    const char *ident;
+    struct ident *ident;
     if (!identifier(state, &ident)) {
         return error(state, "expected identifier");
     }
@@ -627,8 +629,8 @@ parse_result_t parse_function(state_t *state, ast_function_t *function) {
     }
     advance(state);
 
-    const char *name;
-    if (!identifier(state, &name)) {
+    struct ident *ident;
+    if (!identifier(state, &ident)) {
         printf("error: expected identifier\n");
         return error(state, "expected identifier");
     }
@@ -649,7 +651,7 @@ parse_result_t parse_function(state_t *state, ast_function_t *function) {
         return result;
     }
 
-    *function = (ast_function_t){.name = name, .block = block};
+    *function = (ast_function_t){.ident = ident, .block = block};
 
     return ok();
 }
@@ -665,7 +667,8 @@ parse_result_t parse_program(state_t *state, ast_program_t *program) {
             return result;
         }
 
-        map_insert(functions, function->name, function);
+        // TODO: Avoid ident_to_str if/when map can have arbitrary keys
+        map_insert(functions, ident_to_str(function->ident), function);
     }
 
     *program = (ast_program_t){.functions = functions};
@@ -675,8 +678,9 @@ parse_result_t parse_program(state_t *state, ast_program_t *program) {
     return ok();
 }
 
-parse_result_t parser_parse(const char *prog, ast_program_t *program) {
-    lexer_state_t lexer = lexer_new(prog);
+parse_result_t parser_parse(struct ident_table *idents, const char *prog,
+                            ast_program_t *program) {
+    lexer_state_t lexer = lexer_new(idents, prog);
     token_t token;
     if (!lexer_next_token(&lexer, &token)) {
         printf("fatal: couldn't lex\n");
@@ -685,6 +689,7 @@ parse_result_t parser_parse(const char *prog, ast_program_t *program) {
 
     state_t state = {
         .prog = prog,
+        .idents = idents,
         .lexer = lexer,
         .token = token,
         .eof = false,

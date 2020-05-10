@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "ast.h"
+#include "ident.h"
 #include "parser.h"
 
 #include "common.h"
@@ -10,11 +11,15 @@
 static void lsnapshotter(FILE *f, void *data) {
     const char *prog = (const char *)data;
 
-    lexer_state_t state = lexer_new(prog);
+    struct ident_table *idents = ident_table_new();
+
+    lexer_state_t state = lexer_new(idents, prog);
     token_t token;
     while (lexer_next_token(&state, &token)) {
         lexer_print_token(f, token);
     }
+
+    ident_table_free(idents);
 }
 
 #define LEXER_TEST(name, prog)                                                 \

@@ -4,6 +4,7 @@
 
 #include "ast.h"
 #include "common.h"
+#include "ident.h"
 #include "map.h"
 #include "pprint.h"
 #include "ty.h"
@@ -84,7 +85,7 @@ void ast_pprint_expr(struct pprint *pp, ast_expr_t *expr) {
         break;
 
     case Ast_Expr_Var:
-        pprintf(pp, "Var(%s)", expr->str);
+        pprintf(pp, "Var(%s)", ident_to_str(expr->ident));
         break;
 
     case Ast_Expr_BinOp:
@@ -116,7 +117,7 @@ void ast_pprint_expr(struct pprint *pp, ast_expr_t *expr) {
         }
         ast_pprint_expr(pp, expr->member.lhs);
         pprintf(pp, ", ");
-        pprintf(pp, "%s", expr->member.ident);
+        pprintf(pp, "%s", ident_to_str(expr->member.ident));
         pprintf(pp, ")");
         break;
     }
@@ -186,7 +187,7 @@ void ast_pprint_block(struct pprint *pp, ast_block_t *block) {
 }
 
 void ast_pprint_function(struct pprint *pp, ast_function_t *func) {
-    pprintf(pp, "Function(name=%s, ", func->name);
+    pprintf(pp, "Function(name=%s, ", ident_to_str(func->ident));
     ast_pprint_block(pp, &func->block);
     pprintf(pp, ")");
 
@@ -211,7 +212,7 @@ void ast_pprint_declarator(struct pprint *pp, struct ast_declarator *decl) {
         ast_pprint_declarator(pp, decl->next);
         break;
     case Ast_Declarator_Ident:
-        pprintf(pp, " %s", decl->ident);
+        pprintf(pp, " %s", ident_to_str(decl->ident));
         break;
     }
 }

@@ -458,7 +458,8 @@ parse_result_t parse_struct_declaration(state_t *state,
     // TODO: pointer declarators.
     struct vec *declarators = vec_new(sizeof(struct ast_declarator));
 
-    while (true) {
+    // NOTE: We will never enter this loop if there is no declarator.
+    while (!punctuator(state, Punctuator_Semicolon)) {
         struct ast_declarator decl = {0};
         if (iserror(result = parse_declarator(state, &decl))) {
             return result;
@@ -466,10 +467,9 @@ parse_result_t parse_struct_declaration(state_t *state,
 
         vec_append(declarators, &decl);
 
-        if (!punctuator(state, Punctuator_Comma)) {
-            break;
+        if (punctuator(state, Punctuator_Comma)) {
+            advance(state);
         }
-        advance(state);
     }
 
     if (!punctuator(state, Punctuator_Semicolon)) {

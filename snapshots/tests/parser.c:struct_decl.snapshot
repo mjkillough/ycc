@@ -14,5 +14,15 @@ Function(name=main, Block(
     , n, = 0), 
     Decl(Struct(tag, [
         Decl(int, i),
-    , j, = 0)
+    , j, = 0), 
+    Decl(Struct(tag, [
+        Decl(Struct(other, [
+            Decl(int, j),
+        , k),
+    , k, = 0), 
+    Decl(Struct(tag, [
+        Decl(Struct(no_declarator, [
+            Decl(int, j),
+        ,_),
+    , k, = 0)
 ))

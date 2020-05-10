@@ -243,6 +243,10 @@ void ast_pprint_struct_declaration(struct pprint *pp,
         pprintf(pp, "]");
     }
 
+    if (decl->ndeclarators == 0) {
+        pprintf(pp, "_");
+    }
+
     pprintf(pp, ")");
 }
 

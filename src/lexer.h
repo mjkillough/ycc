@@ -28,6 +28,7 @@ typedef enum {
 
 typedef enum {
     Punctuator_Period,
+    Punctuator_Arrow,
 
     Punctuator_Semicolon,
     Punctuator_Comma,

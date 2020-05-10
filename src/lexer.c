@@ -145,6 +145,7 @@ static struct {
     {Punctuator_MinusAssign, "-=", 2},
     {Punctuator_AsteriskAssign, "*=", 2},
     {Punctuator_ForwardSlashAssign, "/=", 2},
+    {Punctuator_Arrow, "->", 2},
 
     {Punctuator_Assign, "=", 1},
     {Punctuator_Ampersand, "&", 1},

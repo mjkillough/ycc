@@ -95,7 +95,7 @@ typedef struct {
 } ast_function_t;
 
 typedef struct {
-    map *functions; // ast_function_t
+    struct map *functions; // ast_function_t
 } ast_program_t;
 
 void ast_pprint_expr(struct pprint *pp, ast_expr_t *expr);

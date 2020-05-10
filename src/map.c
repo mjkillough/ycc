@@ -18,15 +18,20 @@ struct map {
     size_t capacity;
 };
 
-map *map_new() {
-    map *m = calloc(1, sizeof(struct map));
+struct map *map_new() {
+    struct map *m = calloc(1, sizeof(struct map));
     m->entries = calloc(16, sizeof(struct entry));
     m->count = 0;
     m->capacity = 16;
     return m;
 }
 
-static bool overloaded(map *m) {
+void map_free(struct map *m) {
+    free(m->entries);
+    free(m);
+}
+
+static bool overloaded(struct map *m) {
     // 0.5 load factor
     return m->count > (m->capacity - 1);
 }
@@ -40,7 +45,7 @@ static uint32_t fnv_hash(const char *key) {
     return hash;
 }
 
-static size_t entry(map *m, const char *key) {
+static size_t entry(struct map *m, const char *key) {
     return fnv_hash(key) & (m->capacity - 1);
 }
 
@@ -52,7 +57,7 @@ static bool key_eq(const char *key1, const char *key2) {
     return !strcmp(key1, key2);
 }
 
-static void resize(map *m) {
+static void resize(struct map *m) {
     struct entry *old_entries = m->entries;
     size_t old_capacity = m->capacity;
 
@@ -69,7 +74,7 @@ static void resize(map *m) {
     free(old_entries);
 }
 
-void map_insert(map *m, const char *key, void *ptr) {
+void map_insert(struct map *m, const char *key, void *ptr) {
     if (overloaded(m)) {
         resize(m);
     }
@@ -96,7 +101,7 @@ void map_insert(map *m, const char *key, void *ptr) {
     }
 }
 
-void *map_get(map *m, const char *key) {
+void *map_get(struct map *m, const char *key) {
     size_t i = entry(m, key);
     for (;; i = (i + 1) & (m->capacity - 1)) {
         if (key_eq(m->entries[i].key, key)) {
@@ -107,7 +112,7 @@ void *map_get(map *m, const char *key) {
     }
 }
 
-void map_remove(map *m, const char *key) {
+void map_remove(struct map *m, const char *key) {
     size_t i = entry(m, key);
     for (;; i = (i + 1) & (m->capacity - 1)) {
         if (key_eq(m->entries[i].key, key)) {
@@ -120,7 +125,7 @@ void map_remove(map *m, const char *key) {
     }
 }
 
-bool map_iter(map *m, void *context,
+bool map_iter(struct map *m, void *context,
               bool (*callback)(void *context, const char *key, void *value)) {
     for (struct entry *it = m->entries; it < (m->entries + m->capacity); it++) {
         if (it->key != NULL && it->key != TOMBSTONE) {

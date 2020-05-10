@@ -9,7 +9,7 @@
 #include "map.h"
 
 typedef struct {
-    map *env;
+    struct map *env;
     size_t stack_idx;
     uint64_t label_idx;
 } state_t;

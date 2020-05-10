@@ -8,7 +8,7 @@
 
 struct tycheck {
     // map[string]struct ty
-    map *decls;
+    struct map *decls;
     diag_t *diag;
 };
 

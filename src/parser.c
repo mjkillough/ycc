@@ -656,7 +656,7 @@ parse_result_t parse_function(state_t *state, ast_function_t *function) {
 
 // <program> ::= <function>
 parse_result_t parse_program(state_t *state, ast_program_t *program) {
-    map *functions = map_new();
+    struct map *functions = map_new();
 
     while (!eof(state)) {
         ast_function_t *function = calloc(1, sizeof(ast_function_t));

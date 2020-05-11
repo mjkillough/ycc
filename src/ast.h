@@ -137,7 +137,7 @@ struct ast_type {
         // Ast_DeclSpecifier_Struct:
         struct {
             // Identifier, optional:
-            struct ident *ident;
+            struct ident *ident; // TODO: rename tag
             struct ast_struct_declaration *declarations;
             size_t ndeclarations;
         };

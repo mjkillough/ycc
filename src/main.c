@@ -10,10 +10,13 @@
 
 int main() {
     const char *prog = "int main() {\n"
-                       "    int j = 11;\n"
-                       "    int *k = &j;\n"
-                       "    int l = *k + 2;\n"
-                       "    return l;\n"
+                       /* "    int j = 11;\n" */
+                       /* "    int *k = &j;\n" */
+                       /* "    int l = *k + 2;\n" */
+                       "    struct { int i; } j = 0;\n"
+                       "    struct { int i, *j; struct { int k; } m; } n = 0;\n"
+                       "    struct { struct { int i; }; } j = 0;\n"
+                       "    return j;\n"
                        "}\n"
                        "\n"
                        ""
@@ -42,9 +45,9 @@ int main() {
         return -1;
     }
 
-    /* struct tycheck *tyc = tycheck_new(); */
-    /* tycheck_check(tyc, &program); */
-    /* tycheck_free(tyc); */
+    struct tycheck *tyc = tycheck_new();
+    tycheck_check(tyc, &program);
+    tycheck_free(tyc);
 
     printf("---\n\n");
     printf("Source:\n");

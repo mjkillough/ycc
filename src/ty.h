@@ -45,8 +45,10 @@ struct ty {
             struct ident *tag;
 
             // map[struct ident*]struct ty_member*
+            // Owns descriptions of its members.
             struct map *members;
 
+            // Owns descriptions of anonymous members.
             struct ty_member *anonymous;
             size_t nanonymous;
         };

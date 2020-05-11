@@ -1,7 +1,9 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stdlib.h>
 
+#include "map.h"
 #include "pprint.h"
 
 enum basic_ty {
@@ -24,16 +26,36 @@ enum basic_ty {
     // BasicTy_Bool
 };
 
+struct ty_member;
+
 struct ty {
     enum {
         Ty_Basic,
         Ty_Pointer,
+        Ty_Struct,
+        Ty_Incomplete,
     } kind;
     union {
         enum basic_ty basic;
         // Ty_Pointer:
         struct ty *inner;
+        // Ty_Struct:
+        struct {
+            // Optional:
+            struct ident *tag;
+
+            // map[struct ident*]struct ty_member*
+            struct map *members;
+
+            struct ty_member *anonymous;
+            size_t nanonymous;
+        };
     };
+};
+
+struct ty_member {
+    struct ty *ty;
+    // span
 };
 
 void ty_pprint(struct pprint *pp, struct ty *ty);

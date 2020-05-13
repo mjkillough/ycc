@@ -71,6 +71,9 @@ PARSER_TEST(postfix, "int main() {\n"
 PARSER_TEST(decl, "int main() {\n"
                   "int a = 0;\n"
                   "int *b = 0;\n"
+                  "int **c = 0;\n"
+                  "int *const d = 0;\n"
+                  "int *const *e = 0;\n"
                   "}")
 
 PARSER_TEST(struct_decl,

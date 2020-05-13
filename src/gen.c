@@ -148,8 +148,6 @@ static bool gen_block(FILE *f, state_t *state, ast_block_t *block);
 
 static const char *_declarator_ident(struct ast_declarator *declarator) {
     switch (declarator->kind) {
-    case Ast_Declarator_Pointer:
-        return _declarator_ident(declarator->next);
     case Ast_Declarator_Ident:
         return ident_to_str(declarator->ident);
     }

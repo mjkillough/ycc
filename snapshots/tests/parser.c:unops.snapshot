@@ -1,5 +1,5 @@
 Function(name=main, Block(
     Decl(int, a, = Expr(Neg(1))), 
-    Decl(int, * b, = Expr(AddrOf(Var(a)))), 
+    Decl(int, *b, = Expr(AddrOf(Var(a)))), 
     Decl(int, c, = Expr(Deref(Var(b))))
 ))

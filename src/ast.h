@@ -110,17 +110,24 @@ enum ast_basic_type {
     Ast_BasicType_Int,
 };
 
+enum ast_type_qualifier {
+    Ast_TypeQualifier_Const = 1 << 0,
+    /* Ast_TypeQualifier_Restrict = 1 << 1, */
+    /* Ast_TypeQualifier_Volatile = 1 << 2, */
+    /* Ast_TypeQualifier_Atomic = 1 << 3, */
+};
+
 struct ast_declarator {
     enum {
-        Ast_Declarator_Pointer,
         Ast_Declarator_Ident,
     } kind;
     union {
         // Ast_Declarator_Ident:
         struct ident *ident;
-        // Ast_Declarator_Pointer:
-        struct ast_declarator *next;
     };
+    // List of (possibly qualified) pointer declators:
+    enum ast_type_qualifier *pointers;
+    size_t npointers;
 };
 
 struct ast_struct_declaration;

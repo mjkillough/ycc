@@ -418,13 +418,18 @@ parse_result_t parse_statement(state_t *state, ast_statement_t *statement) {
 
 parse_result_t parse_type(state_t *state, struct ast_type *type);
 
-// TODO: SHould this be shared between parse_declaration and
-// parse_struct_declaration, given that the former allows an expr?
 parse_result_t parse_declarator(state_t *state, struct ast_declarator *decl) {
-    bool ptr = false;
-    if (punctuator(state, Punctuator_Asterisk)) {
+    struct vec *pointers = vec_new(sizeof(enum ast_type_qualifier));
+    while (punctuator(state, Punctuator_Asterisk)) {
         advance(state);
-        ptr = true;
+
+        enum ast_type_qualifier qualifiers = 0;
+        if (keyword(state, Keyword_const)) {
+            advance(state);
+            qualifiers |= Ast_TypeQualifier_Const;
+        }
+
+        vec_append(pointers, &qualifiers);
     }
 
     struct ident *ident;
@@ -433,15 +438,9 @@ parse_result_t parse_declarator(state_t *state, struct ast_declarator *decl) {
     }
     advance(state);
 
-    if (!ptr) {
-        decl->kind = Ast_Declarator_Ident;
-        decl->ident = ident;
-    } else {
-        decl->kind = Ast_Declarator_Pointer;
-        decl->next = malloc(sizeof(struct ast_declarator));
-        decl->next->kind = Ast_Declarator_Ident;
-        decl->next->ident = ident;
-    }
+    decl->kind = Ast_Declarator_Ident;
+    decl->ident = ident;
+    decl->npointers = vec_into_raw(pointers, (void **)&decl->pointers);
 
     return ok();
 }
@@ -540,17 +539,9 @@ parse_result_t parse_declaration(state_t *state, struct ast_declaration *decl) {
         return result;
     }
 
-    bool ptr = false;
-    if (punctuator(state, Punctuator_Asterisk)) {
-        advance(state);
-        ptr = true;
+    if (iserror(result = parse_declarator(state, &decl->declarator))) {
+        return result;
     }
-
-    struct ident *ident;
-    if (!identifier(state, &ident)) {
-        return error(state, "expected identifier");
-    }
-    advance(state);
 
     if (!punctuator(state, Punctuator_Assign)) {
         return error(state, "expected =");
@@ -560,16 +551,6 @@ parse_result_t parse_declaration(state_t *state, struct ast_declaration *decl) {
     ast_expr_t *expr = (ast_expr_t *)malloc(sizeof(ast_expr_t));
     if (iserror(result = parse_expr(state, expr))) {
         return result;
-    }
-
-    if (!ptr) {
-        decl->declarator.kind = Ast_Declarator_Ident;
-        decl->declarator.ident = ident;
-    } else {
-        decl->declarator.kind = Ast_Declarator_Pointer;
-        decl->declarator.next = malloc(sizeof(struct ast_declarator));
-        decl->declarator.next->kind = Ast_Declarator_Ident;
-        decl->declarator.next->ident = ident;
     }
 
     decl->expr = expr;

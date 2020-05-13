@@ -206,13 +206,18 @@ void ast_pprint_program(struct pprint *pp, ast_program_t *prog) {
 }
 
 void ast_pprint_declarator(struct pprint *pp, struct ast_declarator *decl) {
+    pprintf(pp, " ");
+
+    for (size_t i = 0; i < decl->npointers; i++) {
+        pprintf(pp, "*");
+        if (decl->pointers[i] & Ast_TypeQualifier_Const) {
+            pprintf(pp, "const ");
+        }
+    }
+
     switch (decl->kind) {
-    case Ast_Declarator_Pointer:
-        pprintf(pp, " *");
-        ast_pprint_declarator(pp, decl->next);
-        break;
     case Ast_Declarator_Ident:
-        pprintf(pp, " %s", ident_to_str(decl->ident));
+        pprintf(pp, "%s", ident_to_str(decl->ident));
         break;
     }
 }

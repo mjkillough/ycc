@@ -1,4 +1,7 @@
 Function(name=main, Block(
     Decl(int, a, = 0), 
-    Decl(int, * b, = 0)
+    Decl(int, *b, = 0), 
+    Decl(int, **c, = 0), 
+    Decl(int, *const d, = 0), 
+    Decl(int, *const *e, = 0)
 ))

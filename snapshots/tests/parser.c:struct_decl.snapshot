@@ -2,7 +2,7 @@ Function(name=main, Block(
     Decl(Struct(_, [
         Decl(int, [
              j,
-             * k,
+             *k,
         ]),
         Decl(int, m),
     , n, = 0), 

@@ -95,14 +95,13 @@ static void tycheck_struct_declarator(struct tycheck *tyc, struct map *members,
                                       struct ast_declarator *decl) {
     UNUSED(tyc);
 
-    while (decl->kind != Ast_Declarator_Ident) {
+    for (size_t i = 0; i < decl->npointers; i++) {
+        // TODO: type qualifiers
         struct ty *inner = ty;
 
         ty = malloc(sizeof(struct ty));
         ty->kind = Ty_Pointer;
         ty->inner = inner;
-
-        decl = decl->next;
     }
 
     struct ty_member *member = malloc(sizeof(struct ty));

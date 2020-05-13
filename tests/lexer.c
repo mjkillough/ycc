@@ -31,7 +31,7 @@ LEXER_TEST(punctuator, ". ->\n"
                        "= += -= *= /=\n"
                        "== != > >= < <=\n"
                        "+ - * /\n"
-                       "( ) { }\n")
+                       "( ) { } [ ]\n")
 
 LEXER_TEST(keywords, "int return if else struct const\n")
 

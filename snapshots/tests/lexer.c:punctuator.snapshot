@@ -22,3 +22,5 @@ Token_Punctuator { .punctuator = ( }
 Token_Punctuator { .punctuator = ) }
 Token_Punctuator { .punctuator = { }
 Token_Punctuator { .punctuator = } }
+Token_Punctuator { .punctuator = [ }
+Token_Punctuator { .punctuator = ] }

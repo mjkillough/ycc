@@ -59,6 +59,8 @@ typedef enum {
     Punctuator_CloseParen,
     Punctuator_OpenBrace,
     Punctuator_CloseBrace,
+    Punctuator_OpenBracket,
+    Punctuator_CloseBracket,
 } token_punctuator_t;
 
 typedef struct {

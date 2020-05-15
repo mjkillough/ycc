@@ -15,23 +15,19 @@ static const char *_basic(enum basic_ty ty) {
     }
 }
 
-static void ty_pprint_member(struct pprint *pp, struct ident *ident,
-                             struct ty_member *member) {
-    pprintf(pp, "(%s, ", ident_to_str(ident));
+static void ty_pprint_member(struct pprint *pp, struct ty_member *member) {
+    if (member->anonymous) {
+        pprintf(pp, "Anonymous");
+        ty_pprint(pp, member->ty);
+        pprintf(pp, ",");
+        pprint_newline(pp);
+        return;
+    }
+
+    pprintf(pp, "(%s, ", ident_to_str(member->ident));
     ty_pprint(pp, member->ty);
     pprintf(pp, "),");
     pprint_newline(pp);
-}
-
-static bool ty_pprint_members_iter(void *context, const void *key,
-                                   void *value) {
-    struct pprint *pp = context;
-    struct ident *ident = (void *)key;
-    struct ty_member *member = value;
-
-    ty_pprint_member(pp, ident, member);
-
-    return true;
 }
 
 void ty_pprint(struct pprint *pp, struct ty *ty) {
@@ -54,13 +50,8 @@ void ty_pprint(struct pprint *pp, struct ty *ty) {
         pprint_newline(pp);
         pprint_indent(pp);
 
-        map_iter(ty->members, pp, ty_pprint_members_iter);
-
-        for (size_t i = 0; i < ty->nanonymous; i++) {
-            pprintf(pp, "Anonymous");
-            ty_pprint(pp, ty->anonymous[i].ty);
-            pprintf(pp, ",");
-            pprint_newline(pp);
+        for (size_t i = 0; i < ty->nmembers; i++) {
+            ty_pprint_member(pp, &ty->members[i]);
         }
 
         pprint_unindent(pp);

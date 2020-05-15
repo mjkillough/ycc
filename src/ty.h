@@ -44,18 +44,25 @@ struct ty {
             // Optional:
             struct ident *tag;
 
-            // map[struct ident*]struct ty_member*
-            // Owns descriptions of its members.
-            struct map *members;
+            // Owns descriptions of all members in the order that they are
+            // defined. The full type (i.e. struct/union type) are included for
+            // layout purposes.
+            struct ty_member *members;
+            size_t nmembers;
 
-            // Owns descriptions of anonymous members.
-            struct ty_member *anonymous;
-            size_t nanonymous;
+            // map[struct ident*]struct ty_member*
+            // Non-owning. Allows efficient lookup of type for a member's ident
+            // which is useful for type-checking. Anonymous members' members are
+            // inlined into this lookup.
+            struct map *lookup;
         };
     };
 };
 
 struct ty_member {
+    bool anonymous;
+    // Optional:
+    struct ident *ident;
     struct ty *ty;
     // span
 };

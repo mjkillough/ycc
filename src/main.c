@@ -16,6 +16,8 @@ int main() {
                        "    struct { int i; } j = 0;\n"
                        "    struct { int i, *j; struct { int k; } m; } n = 0;\n"
                        "    struct { struct { int i; }; } j = 0;\n"
+                       "    struct { int a; struct { struct { int b; }; int c; "
+                       "}; int d; } e = 0;\n"
                        "    return j;\n"
                        "}\n"
                        "\n"

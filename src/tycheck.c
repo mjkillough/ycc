@@ -90,7 +90,7 @@ static struct ty *ty_from_ast_basic(enum ast_basic_type ast_basic) {
     return ty;
 }
 
-static void tycheck_struct_declarator(struct tycheck *tyc, struct map *members,
+static void tycheck_struct_declarator(struct tycheck *tyc, struct vec *members,
                                       struct ty *ty,
                                       struct ast_declarator *decl) {
     UNUSED(tyc);
@@ -104,24 +104,29 @@ static void tycheck_struct_declarator(struct tycheck *tyc, struct map *members,
         ty->inner = inner;
     }
 
-    struct ty_member *member = malloc(sizeof(struct ty));
-    member->ty = ty;
-
-    map_insert(members, decl->ident, member);
+    struct ty_member member = {
+        .anonymous = false,
+        .ident = decl->ident,
+        .ty = ty,
+    };
+    vec_append(members, &member);
 }
 
 static struct ty *tycheck_type(struct tycheck *tyc, struct ast_type *ast_ty);
 
-static void tycheck_struct_declaration(struct tycheck *tyc, struct map *members,
-                                       struct vec *anonymous,
+static void tycheck_struct_declaration(struct tycheck *tyc, struct vec *members,
                                        struct ast_struct_declaration *decl) {
     struct ty *ty = tycheck_type(tyc, &decl->type);
 
     // If the type is a struct without a tag and is missing an identifier, treat
     // it as an anonymous member of the current struct.
     if (ty->kind == Ty_Struct && ty->tag == NULL && decl->ndeclarators == 0) {
-        struct ty_member member = {.ty = ty};
-        vec_append(anonymous, &member);
+        struct ty_member anonymous = {
+            .anonymous = true,
+            .ident = NULL,
+            .ty = ty,
+        };
+        vec_append(members, &anonymous);
     }
 
     for (size_t i = 0; i < decl->ndeclarators; i++) {
@@ -129,20 +134,39 @@ static void tycheck_struct_declaration(struct tycheck *tyc, struct map *members,
     }
 }
 
+static void tycheck_struct_construct_lookup(struct tycheck *tyc,
+                                            struct map *lookup, struct ty *ty) {
+    // Construct a look-up from each member's ident to its type, including the
+    // members of any anonymous members (or anonymous members' members, etc.)
+    for (size_t i = 0; i < ty->nmembers; i++) {
+        struct ty_member *member = &ty->members[i];
+
+        if (member->anonymous) {
+            tycheck_struct_construct_lookup(tyc, lookup, member->ty);
+        } else if (member->ident != NULL) {
+            // A tagged member without a declarator (i.e. with ident == NULL) is
+            // just a declaration and shouldn't be included in the lookup.
+
+            // TODO: Check that the member doesn't already exist and error.
+            map_insert(lookup, member->ident, member);
+        }
+    }
+}
+
 static struct ty *tycheck_type_struct(struct tycheck *tyc,
                                       struct ast_type *ast_ty) {
-    struct vec *anonymous = vec_new(sizeof(struct ty_member));
-    struct map *members = map_new(map_key_pointer);
+    struct vec *members = vec_new(sizeof(struct ty_member));
     for (size_t i = 0; i < ast_ty->ndeclarations; i++) {
-        tycheck_struct_declaration(tyc, members, anonymous,
-                                   &ast_ty->declarations[i]);
+        tycheck_struct_declaration(tyc, members, &ast_ty->declarations[i]);
     }
 
     struct ty *ty = malloc(sizeof(struct ty));
     ty->kind = Ty_Struct;
     ty->tag = ast_ty->ident;
-    ty->members = members;
-    ty->nanonymous = vec_into_raw(anonymous, (void **)&ty->anonymous);
+    ty->nmembers = vec_into_raw(members, (void **)&ty->members);
+    ty->lookup = map_new(map_key_pointer);
+
+    tycheck_struct_construct_lookup(tyc, ty->lookup, ty);
 
     // If it's tagged, we declare a new type with the given tag. If it's
     // untagged, we still pass ownership of the struct ty* to the current
@@ -158,7 +182,6 @@ static struct ty *tycheck_type_struct(struct tycheck *tyc,
 }
 
 static struct ty *tycheck_type(struct tycheck *tyc, struct ast_type *ast_ty) {
-
     switch (ast_ty->kind) {
     case Ast_Type_BasicType:
         return ty_from_ast_basic(ast_ty->basic);
@@ -169,8 +192,6 @@ static struct ty *tycheck_type(struct tycheck *tyc, struct ast_type *ast_ty) {
 }
 
 void tycheck_declaration(struct tycheck *tyc, struct ast_declaration *decl) {
-    UNUSED(tyc);
-
     struct ty *ty = tycheck_type(tyc, &decl->type);
 
     struct pprint *pp = pprint_new(stdout);

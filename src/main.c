@@ -10,26 +10,12 @@
 
 int main() {
     const char *prog = "int main() {\n"
-                       /* "    int j = 11;\n" */
-                       /* "    int *k = &j;\n" */
-                       /* "    int l = *k + 2;\n" */
-                       "    struct { int i; } j = 0;\n"
-                       "    struct { int i, *j; struct { int k; } m; } n = 0;\n"
-                       "    struct { struct { int i; }; } j = 0;\n"
-                       "    struct { int a; struct { struct { int b; }; int c; "
-                       "}; int d; } e = 0;\n"
-                       "    return j;\n"
+                       "    int a = 1, b;\n"
+                       "    b = 2;\n"
+                       "    int c = a + b;\n"
+                       "    return c;\n"
                        "}\n"
-                       "\n"
-                       ""
-                       "int foo() {\n"
-                       "    return 4;\n"
-                       "}\n"
-                       "\n"
-                       ""
-                       "int blah() {\n"
-                       "    return 5;\n"
-                       "}\n";
+                       "\n";
 
     // lexer_state_t state = lexer_new(prog);
     // token_t token;

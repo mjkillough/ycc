@@ -15,7 +15,7 @@ typedef struct {
     uint64_t label_idx;
 } state_t;
 
-static size_t var_idx(state_t *state, const char *ident) {
+static size_t var_idx(state_t *state, const struct ident *ident) {
     return (size_t)map_get(state->env, ident);
 }
 
@@ -25,7 +25,7 @@ static bool gen_expr(FILE *f, state_t *state, ast_expr_t *expr) {
         fprintf(f, "mov $%s, %%rax\n", expr->str);
         break;
     case Ast_Expr_Var:
-        fprintf(f, "mov -%zu(%%rbp), %%rax\n", var_idx(state, expr->str));
+        fprintf(f, "mov -%zu(%%rbp), %%rax\n", var_idx(state, expr->ident));
         break;
     case Ast_Expr_BinOp:
         gen_expr(f, state, expr->rhs);
@@ -91,7 +91,7 @@ static bool gen_expr(FILE *f, state_t *state, ast_expr_t *expr) {
                 exit(-1);
             }
             fprintf(f, "mov %%rbp, %%rax\n");
-            fprintf(f, "sub $%zu, %%rax\n", var_idx(state, expr->lhs->str));
+            fprintf(f, "sub $%zu, %%rax\n", var_idx(state, expr->lhs->ident));
             break;
         case Ast_UnOp_Deref:
             if (expr->lhs->discrim != Ast_Expr_Var) {
@@ -99,7 +99,7 @@ static bool gen_expr(FILE *f, state_t *state, ast_expr_t *expr) {
                 exit(-1);
             }
             fprintf(f, "mov -%zu(%%rbp), %%rax\n",
-                    var_idx(state, expr->lhs->str));
+                    var_idx(state, expr->lhs->ident));
             fprintf(f, "mov (%%rax), %%rax\n");
             break;
         }
@@ -125,7 +125,7 @@ static bool gen_expr(FILE *f, state_t *state, ast_expr_t *expr) {
         case Ast_AssignOp_Multiplication:
             fprintf(f, "mov %%rax, %%rcx\n");
             fprintf(f, "mov -%zu(%%rbp), %%rax\n",
-                    var_idx(state, expr->lhs->str));
+                    var_idx(state, expr->lhs->ident));
             fprintf(f, "imul %%rcx, %%rax\n");
             fprintf(f, "mov %%rax, ");
             break;
@@ -133,23 +133,23 @@ static bool gen_expr(FILE *f, state_t *state, ast_expr_t *expr) {
             fprintf(f, "mov %%rax, %%rcx\n");
             fprintf(f, "mov $0, %%rdx\n");
             fprintf(f, "mov -%zu(%%rbp), %%rax\n",
-                    var_idx(state, expr->lhs->str));
+                    var_idx(state, expr->lhs->ident));
             fprintf(f, "idiv %%rcx\n");
             fprintf(f, "mov %%rax, ");
             break;
         }
 
-        fprintf(f, "-%zu(%%rbp)\n", var_idx(state, expr->lhs->str));
+        fprintf(f, "-%zu(%%rbp)\n", var_idx(state, expr->lhs->ident));
     }
     return true;
 }
 
 static bool gen_block(FILE *f, state_t *state, ast_block_t *block);
 
-static const char *_declarator_ident(struct ast_declarator *declarator) {
+static struct ident *_declarator_ident(struct ast_declarator *declarator) {
     switch (declarator->kind) {
     case Ast_Declarator_Ident:
-        return ident_to_str(declarator->ident);
+        return declarator->ident;
     }
 }
 
@@ -225,7 +225,7 @@ static bool gen_block(FILE *f, state_t *state, ast_block_t *block) {
 
 static bool gen_function(FILE *f, ast_function_t *func) {
     state_t state = {
-        .env = map_new(map_key_string),
+        .env = map_new(map_key_pointer),
         .stack_idx = 8,
     };
     fprintf(f, " .globl %s\n", ident_to_str(func->ident));

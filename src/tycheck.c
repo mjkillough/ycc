@@ -59,12 +59,14 @@ void scope_take_ownership(struct scope *s, void *ptr) {
 struct tycheck {
     struct {
         struct scope *tags;
+        struct scope *ordinary;
     } namespaces;
 };
 
 struct tycheck *tycheck_new() {
     struct tycheck *tyc = malloc(sizeof(struct tycheck));
     tyc->namespaces.tags = scope_new();
+    tyc->namespaces.ordinary = scope_new();
     return tyc;
 }
 
@@ -191,8 +193,28 @@ static struct ty *tycheck_type(struct tycheck *tyc, struct ast_type *ast_ty) {
     }
 }
 
+static void tycheck_declarator(struct tycheck *tyc, struct ty *ty,
+                               struct ast_declarator *decl) {
+    for (size_t i = 0; i < decl->npointers; i++) {
+        // TODO: type qualifiers
+        struct ty *inner = ty;
+
+        ty = malloc(sizeof(struct ty));
+        ty->kind = Ty_Pointer;
+        ty->inner = inner;
+    }
+
+    scope_declare(tyc->namespaces.ordinary, decl->ident, ty);
+}
+
 void tycheck_declaration(struct tycheck *tyc, struct ast_declaration *decl) {
     struct ty *ty = tycheck_type(tyc, &decl->type);
+
+    for (size_t i = 0; i < decl->ndeclarators; i++) {
+        tycheck_declarator(tyc, ty, &decl->declarators[i]);
+
+        // TODO: type check expr if it exists
+    }
 
     struct pprint *pp = pprint_new(stdout);
     pprintf(pp, "---\n");

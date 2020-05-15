@@ -206,8 +206,6 @@ void ast_pprint_program(struct pprint *pp, ast_program_t *prog) {
 }
 
 void ast_pprint_declarator(struct pprint *pp, struct ast_declarator *decl) {
-    pprintf(pp, " ");
-
     for (size_t i = 0; i < decl->npointers; i++) {
         pprintf(pp, "*");
         if (decl->pointers[i] & Ast_TypeQualifier_Const) {
@@ -226,10 +224,10 @@ void ast_pprint_struct_declaration(struct pprint *pp,
                                    struct ast_struct_declaration *decl) {
     pprintf(pp, "Decl(");
     ast_pprint_type(pp, &decl->type);
-    pprintf(pp, ",");
+    pprintf(pp, ", ");
 
     if (decl->ndeclarators > 1) {
-        pprintf(pp, " [");
+        pprintf(pp, "[");
         pprint_newline(pp);
         pprint_indent(pp);
     }
@@ -300,12 +298,35 @@ void ast_pprint_type(struct pprint *pp, struct ast_type *ty) {
 void ast_pprint_declaration(struct pprint *pp, struct ast_declaration *decl) {
     pprintf(pp, "Decl(");
     ast_pprint_type(pp, &decl->type);
-    pprintf(pp, ",");
-    ast_pprint_declarator(pp, &decl->declarator);
+    pprintf(pp, ", ");
 
-    if (decl->expr != NULL) {
-        pprintf(pp, ", = ");
-        ast_pprint_expr(pp, decl->expr);
+    if (decl->ndeclarators > 1) {
+        pprintf(pp, "[");
+        pprint_newline(pp);
+        pprint_indent(pp);
+    }
+
+    for (size_t i = 0; i < decl->ndeclarators; i++) {
+        if (decl->ndeclarators > 1) {
+            pprintf(pp, "(");
+        }
+
+        ast_pprint_declarator(pp, &decl->declarators[i]);
+
+        if (decl->exprs[i] != NULL) {
+            pprintf(pp, ", = ");
+            ast_pprint_expr(pp, decl->exprs[i]);
+        }
+
+        if (decl->ndeclarators > 1) {
+            pprintf(pp, ")");
+            pprint_newline(pp);
+        }
+    }
+
+    if (decl->ndeclarators > 1) {
+        pprint_unindent(pp);
+        pprintf(pp, "]");
     }
 
     pprintf(pp, ")");

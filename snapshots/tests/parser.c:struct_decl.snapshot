@@ -1,8 +1,8 @@
 Function(name=main, Block(
     Decl(Struct(_, [
         Decl(int, [
-             j,
-             *k,
+            j,
+            *k,
         ]),
         Decl(int, m),
     , n, = 0), 
@@ -23,6 +23,6 @@ Function(name=main, Block(
     Decl(Struct(tag, [
         Decl(Struct(no_declarator, [
             Decl(int, j),
-        ,_),
+        , _),
     , k, = 0)
 ))

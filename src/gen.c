@@ -193,11 +193,18 @@ static bool gen_statement(FILE *f, state_t *state, ast_statement_t *stmt) {
 
 static bool gen_declaration(FILE *f, state_t *state,
                             struct ast_declaration *decl) {
-    gen_expr(f, state, decl->expr);
-    fprintf(f, "pushq %%rax\n");
-    map_insert(state->env, _declarator_ident(&decl->declarator),
-               (void *)state->stack_idx);
-    state->stack_idx += 8;
+    for (size_t i = 0; i < decl->ndeclarators; i++) {
+        if (decl->exprs[i] != NULL) {
+            gen_expr(f, state, decl->exprs[i]);
+        }
+        // TODO: We can avoid the push and just decrement the stack pointer if
+        // we don't have an expr.
+        fprintf(f, "pushq %%rax\n");
+        map_insert(state->env, _declarator_ident(&decl->declarators[i]),
+                   (void *)state->stack_idx);
+        state->stack_idx += 8;
+    }
+
     return true;
 }
 

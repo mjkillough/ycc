@@ -445,8 +445,6 @@ parse_result_t parse_declarator(state_t *state, struct ast_declarator *decl) {
     return ok();
 }
 
-// XXX: There's a lot of similarity with parse_declaration, although structs
-// will eventually allow bitfields. Considers collapsing.
 parse_result_t parse_struct_declaration(state_t *state,
                                         struct ast_struct_declaration *decl) {
     parse_result_t result = {0};
@@ -539,26 +537,36 @@ parse_result_t parse_declaration(state_t *state, struct ast_declaration *decl) {
         return result;
     }
 
-    if (iserror(result = parse_declarator(state, &decl->declarator))) {
-        return result;
-    }
+    struct vec *declarators = vec_new(sizeof(struct ast_declarator));
+    struct vec *exprs = vec_new(sizeof(ast_expr_t *));
 
-    if (!punctuator(state, Punctuator_Assign)) {
-        return error(state, "expected =");
+    while (!punctuator(state, Punctuator_Semicolon)) {
+        struct ast_declarator declarator = {0};
+        if (iserror(result = parse_declarator(state, &declarator))) {
+            return result;
+        }
+
+        ast_expr_t *expr = NULL;
+        if (punctuator(state, Punctuator_Assign)) {
+            advance(state);
+
+            expr = malloc(sizeof(ast_expr_t));
+            if (iserror(result = parse_expr(state, expr))) {
+                return result;
+            }
+        }
+
+        vec_append(declarators, &declarator);
+        vec_append(exprs, &expr);
+
+        if (punctuator(state, Punctuator_Comma)) {
+            advance(state);
+        }
     }
     advance(state);
 
-    ast_expr_t *expr = (ast_expr_t *)malloc(sizeof(ast_expr_t));
-    if (iserror(result = parse_expr(state, expr))) {
-        return result;
-    }
-
-    decl->expr = expr;
-
-    if (!punctuator(state, Punctuator_Semicolon)) {
-        return error(state, "expected semicolon");
-    }
-    advance(state);
+    decl->ndeclarators = vec_into_raw(declarators, (void **)&decl->declarators);
+    vec_into_raw(exprs, (void **)&decl->exprs);
 
     return ok();
 }

@@ -161,9 +161,11 @@ struct ast_struct_declaration {
 
 struct ast_declaration {
     struct ast_type type;
-    struct ast_declarator declarator;
-    // Optional:
-    ast_expr_t *expr;
+    // There are ndeclarators of declarators and exprs. The expr might be NULL
+    // if there is no initializer.
+    struct ast_declarator *declarators;
+    ast_expr_t **exprs;
+    size_t ndeclarators;
 };
 
 void ast_pprint_declarator(struct pprint *pp, struct ast_declarator *decl);

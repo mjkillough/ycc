@@ -74,7 +74,15 @@ PARSER_TEST(decl, "int main() {\n"
                   "int **c = 0;\n"
                   "int *const d = 0;\n"
                   "int *const *e = 0;\n"
+                  "int f;\n"
                   "}")
+
+PARSER_TEST(decl_multiple, "int main() {\n"
+                           "int a = 0, b = 1;\n"
+                           "int c = 0, d;\n"
+                           "int e, f;\n"
+                           "int g, *h;\n"
+                           "}")
 
 PARSER_TEST(struct_decl,
             "int main() {\n"

@@ -1,0 +1,18 @@
+Function(name=main, Block(
+    Decl(int, [
+        (a, = 0)
+        (b, = 1)
+    ]), 
+    Decl(int, [
+        (c, = 0)
+        (d)
+    ]), 
+    Decl(int, [
+        (e)
+        (f)
+    ]), 
+    Decl(int, [
+        (g)
+        (*h)
+    ])
+))

@@ -3,6 +3,7 @@
 #include "ast.h"
 #include "common.h"
 #include "diag.h"
+#include "ident.h"
 #include "map.h"
 #include "ty.h"
 #include "vec.h"
@@ -155,8 +156,122 @@ static void tycheck_struct_construct_lookup(struct tycheck *tyc,
     }
 }
 
-static struct ty *tycheck_type_struct(struct tycheck *tyc,
-                                      struct ast_type *ast_ty) {
+static size_t alignment_padding(size_t base, size_t alignment) {
+    size_t delta = (base % alignment);
+    if (delta == 0) {
+        return 0;
+    }
+    return alignment - delta;
+}
+
+struct layout {
+    char alignment;
+    size_t size;
+
+    struct layout_member *members;
+    size_t nmembers;
+
+    // map[struct ident*]struct layout_member*
+    struct map *lookup;
+};
+
+struct layout_member {
+    struct ident *ident;
+    size_t offset;
+    struct layout *layout;
+};
+
+static void layout_pprint(struct pprint *pp, struct layout *layout);
+
+static void layout_pprint_member(struct pprint *pp,
+                                 struct layout_member *member) {
+    pprintf(pp, "(%s, %zu, ", ident_to_str(member->ident), member->offset);
+    layout_pprint(pp, member->layout);
+    pprintf(pp, ")");
+}
+
+static void layout_pprint(struct pprint *pp, struct layout *layout) {
+    pprintf(pp, "Layout(alignment = %zu, size = %zu", layout->alignment,
+            layout->size);
+
+    if (layout->nmembers == 0) {
+        pprintf(pp, ")");
+        return;
+    }
+
+    pprintf(pp, " ");
+    if (layout->nmembers > 1) {
+        pprintf(pp, "[");
+        pprint_newline(pp);
+        pprint_indent(pp);
+    }
+
+    for (size_t i = 0; i < layout->nmembers; i++) {
+        layout_pprint_member(pp, &layout->members[i]);
+
+        if (layout->nmembers > 1) {
+            pprintf(pp, ",");
+            pprint_newline(pp);
+        }
+    }
+
+    if (layout->nmembers > 1) {
+        pprint_unindent(pp);
+        pprintf(pp, "]");
+    }
+    pprintf(pp, ")");
+    pprint_newline(pp);
+}
+
+static struct layout *layout_ty(struct ty *ty);
+
+static struct layout *layout_ty_struct(struct ty *ty) {
+    size_t alignment = 0;
+    size_t size = 0;
+
+    struct vec *members = vec_new(sizeof(struct layout_member));
+    for (size_t i = 0; i < ty->nmembers; i++) {
+        struct layout *layout = layout_ty(ty->members[i].ty);
+
+        size += alignment_padding(size, layout->alignment);
+        struct layout_member member = {
+            .ident = ty->members[i].ident,
+            .offset = size,
+            .layout = layout,
+        };
+
+        vec_append(members, &member);
+
+        size += layout->size;
+    }
+
+    // TODO: Alignment to stride.
+    struct layout *layout = malloc(sizeof(layout));
+    layout->alignment = alignment;
+    layout->size = size;
+    layout->nmembers = vec_into_raw(members, (void **)&layout->members);
+    layout->lookup = map_new(map_key_pointer);
+
+    return layout;
+}
+
+static struct layout *layout_ty(struct ty *ty) {
+    switch (ty->kind) {
+    case Ty_Basic: {
+        struct layout *layout = malloc(sizeof(struct layout));
+        layout->alignment = 1;
+        layout->size = 8;
+        layout->nmembers = 0;
+        return layout;
+    }
+
+    case Ty_Struct:
+        return layout_ty_struct(ty);
+    }
+}
+
+static struct ty *
+tycheck_type_struct(struct tycheck *tyc, struct ast_type *ast_ty) {
     struct vec *members = vec_new(sizeof(struct ty_member));
     for (size_t i = 0; i < ast_ty->ndeclarations; i++) {
         tycheck_struct_declaration(tyc, members, &ast_ty->declarations[i]);
@@ -179,6 +294,10 @@ static struct ty *tycheck_type_struct(struct tycheck *tyc,
     } else {
         scope_declare(scope, ty->tag, ty);
     }
+
+    struct layout *layout = layout_ty(ty);
+    struct pprint *pp = pprint_new(stdout);
+    layout_pprint(pp, layout);
 
     return ty;
 }

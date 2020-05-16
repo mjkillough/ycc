@@ -13,6 +13,7 @@ int main() {
                        "    int a = 1, b;\n"
                        "    b = 2;\n"
                        "    int c = a + b;\n"
+                       "    struct { int a; int b; };\n"
                        "    return c;\n"
                        "}\n"
                        "\n";

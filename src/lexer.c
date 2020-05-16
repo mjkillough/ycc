@@ -11,9 +11,11 @@ static const struct {
     token_keyword_t keyword;
     const char *str;
 } keywords[] = {
-    {Keyword_int, "int"},       {Keyword_return, "return"},
-    {Keyword_if, "if"},         {Keyword_else, "else"},
-    {Keyword_struct, "struct"}, {Keyword_const, "const"},
+    {Keyword_char, "char"},     {Keyword_short, "short"},
+    {Keyword_int, "int"},       {Keyword_long, "long"},
+    {Keyword_return, "return"}, {Keyword_if, "if"},
+    {Keyword_else, "else"},     {Keyword_struct, "struct"},
+    {Keyword_const, "const"},
 };
 
 static bool lookup_keyword(const char *str, size_t len, token_keyword_t *out) {

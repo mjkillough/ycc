@@ -1,4 +1,7 @@
+Token_Keyword    { .keyword = char }
+Token_Keyword    { .keyword = short }
 Token_Keyword    { .keyword = int }
+Token_Keyword    { .keyword = long }
 Token_Keyword    { .keyword = return }
 Token_Keyword    { .keyword = if }
 Token_Keyword    { .keyword = else }

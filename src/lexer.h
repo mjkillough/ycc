@@ -20,7 +20,10 @@ typedef enum {
 } token_discrim_t;
 
 typedef enum {
+    Keyword_char,
+    Keyword_short,
     Keyword_int,
+    Keyword_long,
     Keyword_return,
     Keyword_if,
     Keyword_else,

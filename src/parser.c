@@ -515,13 +515,24 @@ parse_result_t parse_type_struct(state_t *state, struct ast_type *type) {
 }
 
 parse_result_t parse_type(state_t *state, struct ast_type *type) {
-    if (keyword(state, Keyword_int)) {
-        advance(state);
+    struct {
+        token_keyword_t keyword;
+        enum ast_basic_type type;
+    } basic_types[] = {
+        {Keyword_char, Ast_BasicType_Char},
+        {Keyword_short, Ast_BasicType_Short},
+        {Keyword_int, Ast_BasicType_Int},
+        {Keyword_long, Ast_BasicType_Long},
+    };
 
-        type->kind = Ast_Type_BasicType;
-        type->basic = Ast_BasicType_Int;
+    for (size_t i = 0; i < sizeof(basic_types) / sizeof(basic_types[0]); i++) {
+        if (keyword(state, basic_types[i].keyword)) {
+            advance(state);
 
-        return ok();
+            type->kind = Ast_Type_BasicType;
+            type->basic = basic_types[i].type;
+            return ok();
+        }
     }
 
     if (keyword(state, Keyword_struct)) {
@@ -575,7 +586,9 @@ parse_result_t parse_block_item(state_t *state, struct ast_block_item *item){
     parse_result_t result = {0};
 
     bool is_type =
-        keyword(state, Keyword_int) || keyword(state, Keyword_struct);
+        keyword(state, Keyword_char) || keyword(state, Keyword_short) ||
+        keyword(state, Keyword_int) || keyword(state, Keyword_long) ||
+        keyword(state, Keyword_struct);
     if (is_type) {
         item->kind = Ast_BlockItem_Declaration;
         if (iserror(result = parse_declaration(state, &item->decl))) {

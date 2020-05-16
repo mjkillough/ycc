@@ -81,8 +81,17 @@ static struct ty *ty_from_ast_basic(enum ast_basic_type ast_basic) {
     enum basic_ty basic;
 
     switch (ast_basic) {
+    case Ast_BasicType_Char:
+        basic = BasicTy_Char;
+        break;
+    case Ast_BasicType_Short:
+        basic = BasicTy_ShortInt;
+        break;
     case Ast_BasicType_Int:
         basic = BasicTy_Int;
+        break;
+    case Ast_BasicType_Long:
+        basic = BasicTy_LongInt;
         break;
     }
 
@@ -255,15 +264,36 @@ static struct layout *layout_ty_struct(struct ty *ty) {
     return layout;
 }
 
+static struct layout *layout_basic_ty(enum basic_ty ty) {
+    struct layout *layout = malloc(sizeof(struct layout));
+    layout->nmembers = 0;
+
+    switch (ty) {
+    case BasicTy_Char:
+        layout->alignment = 1;
+        layout->size = 1;
+        break;
+    case BasicTy_ShortInt:
+        layout->alignment = 2;
+        layout->size = 2;
+        break;
+    case BasicTy_Int:
+        layout->alignment = 4;
+        layout->size = 4;
+        break;
+    case BasicTy_LongInt:
+        layout->alignment = 8;
+        layout->size = 8;
+        break;
+    }
+
+    return layout;
+}
+
 static struct layout *layout_ty(struct ty *ty) {
     switch (ty->kind) {
-    case Ty_Basic: {
-        struct layout *layout = malloc(sizeof(struct layout));
-        layout->alignment = 1;
-        layout->size = 8;
-        layout->nmembers = 0;
-        return layout;
-    }
+    case Ty_Basic:
+        return layout_basic_ty(ty->basic);
 
     case Ty_Struct:
         return layout_ty_struct(ty);

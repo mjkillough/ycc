@@ -255,8 +255,14 @@ void ast_pprint_struct_declaration(struct pprint *pp,
 
 static const char *_basic_type(enum ast_basic_type ty) {
     switch (ty) {
+    case Ast_BasicType_Char:
+        return "char";
+    case Ast_BasicType_Short:
+        return "short";
     case Ast_BasicType_Int:
         return "int";
+    case Ast_BasicType_Long:
+        return "long";
     }
 }
 

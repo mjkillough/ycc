@@ -10,8 +10,14 @@
 
 static const char *_basic(enum basic_ty ty) {
     switch (ty) {
+    case BasicTy_Char:
+        return "char";
+    case BasicTy_ShortInt:
+        return "short";
     case BasicTy_Int:
         return "int";
+    case BasicTy_LongInt:
+        return "long";
     }
 }
 

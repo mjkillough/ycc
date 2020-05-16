@@ -107,7 +107,10 @@ void ast_pprint_function(struct pprint *pp, ast_function_t *func);
 void ast_pprint_program(struct pprint *pp, ast_program_t *prog);
 
 enum ast_basic_type {
+    Ast_BasicType_Char,
+    Ast_BasicType_Short,
     Ast_BasicType_Int,
+    Ast_BasicType_Long,
 };
 
 enum ast_type_qualifier {

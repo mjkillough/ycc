@@ -7,13 +7,13 @@
 #include "pprint.h"
 
 enum basic_ty {
-    // BasicTy_Char,
+    BasicTy_Char,
 
     // Signed Integers:
     // BasicTy_SignedChar,
-    // BasicTy_ShortInt,
+    BasicTy_ShortInt,
     BasicTy_Int,
-    // BasicTy_LongInt,
+    BasicTy_LongInt,
     // BasicTy_LongLongInt,
 
     // Unsigned Integers:

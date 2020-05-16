@@ -258,6 +258,11 @@ static struct layout *layout_ty_struct(struct ty *ty) {
         }
     }
 
+    // Add padding at the end so that we're a multiple of our alignment
+    // (stride). This will allow us to have an array of structs and have each
+    // aligned properly.
+    size += alignment_padding(size, alignment);
+
     struct layout *layout = malloc(sizeof(layout));
     layout->alignment = alignment;
     layout->size = size;

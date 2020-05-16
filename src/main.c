@@ -14,7 +14,7 @@ int main() {
                        "    b = 2;\n"
                        "    int c = a + b;\n"
                        "    short d = 0;\n"
-                       "    struct { short a; int b; };\n"
+                       "    struct { short a; int b; char c; };\n"
                        "    return c;\n"
                        "}\n"
                        "\n";

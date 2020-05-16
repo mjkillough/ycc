@@ -6,4 +6,5 @@ Token_Keyword    { .keyword = return }
 Token_Keyword    { .keyword = if }
 Token_Keyword    { .keyword = else }
 Token_Keyword    { .keyword = struct }
+Token_Keyword    { .keyword = union }
 Token_Keyword    { .keyword = const }

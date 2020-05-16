@@ -28,6 +28,7 @@ typedef enum {
     Keyword_if,
     Keyword_else,
     Keyword_struct,
+    Keyword_union,
     Keyword_const,
 } token_keyword_t;
 

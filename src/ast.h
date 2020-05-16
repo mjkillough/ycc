@@ -131,6 +131,9 @@ struct ast_declarator {
     // List of (possibly qualified) pointer declators:
     enum ast_type_qualifier *pointers;
     size_t npointers;
+
+    // Type annotation, determined during tycheck:
+    struct ty *ty;
 };
 
 struct ast_struct_declaration;

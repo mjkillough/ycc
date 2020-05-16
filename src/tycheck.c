@@ -74,6 +74,9 @@ static void tycheck_struct_declarator(struct tycheck *tyc, struct vec *members,
         .ty = ty,
     };
     vec_append(members, &member);
+
+    // Annotate AST:
+    decl->ty = ty;
 }
 
 static struct ty *tycheck_type(struct tycheck *tyc, struct ast_type *ast_ty);
@@ -363,6 +366,9 @@ static void tycheck_declarator(struct tycheck *tyc, struct ty *ty,
     }
 
     scope_declare(tyc->namespaces.ordinary, decl->ident, ty);
+
+    // Annotate AST:
+    decl->ty = ty;
 }
 
 void tycheck_declaration(struct tycheck *tyc, struct ast_declaration *decl) {

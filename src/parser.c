@@ -441,6 +441,7 @@ parse_result_t parse_declarator(state_t *state, struct ast_declarator *decl) {
     decl->kind = Ast_Declarator_Ident;
     decl->ident = ident;
     decl->npointers = vec_into_raw(pointers, (void **)&decl->pointers);
+    decl->ty = NULL;
 
     return ok();
 }

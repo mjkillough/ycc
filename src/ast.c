@@ -266,8 +266,12 @@ static const char *_basic_type(enum ast_basic_type ty) {
     }
 }
 
-static void ast_pprint_struct(struct pprint *pp, struct ast_type *ty) {
-    pprintf(pp, "Struct(");
+static void ast_pprint_struct_union(struct pprint *pp, struct ast_type *ty) {
+    if (ty->kind == Ast_Type_Struct) {
+        pprintf(pp, "Struct(");
+    } else {
+        pprintf(pp, "Union(");
+    }
 
     if (ty->ident != NULL) {
         pprintf(pp, "%s", ident_to_str(ty->ident));
@@ -295,8 +299,9 @@ void ast_pprint_type(struct pprint *pp, struct ast_type *ty) {
         pprintf(pp, _basic_type(ty->basic));
         break;
 
+    case Ast_Type_Union:
     case Ast_Type_Struct:
-        ast_pprint_struct(pp, ty);
+        ast_pprint_struct_union(pp, ty);
         break;
     }
 }

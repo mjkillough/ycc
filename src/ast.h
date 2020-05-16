@@ -140,11 +140,13 @@ struct ast_type {
     enum {
         Ast_Type_BasicType,
         Ast_Type_Struct,
+        Ast_Type_Union,
     } kind;
     union {
         // Ast_DeclSpecifier_BasicType:
         enum ast_basic_type basic;
         // Ast_DeclSpecifier_Struct:
+        // Ast_DeclSpecifier_Union:
         struct {
             // Identifier, optional:
             struct ident *ident; // TODO: rename tag
@@ -154,7 +156,7 @@ struct ast_type {
     };
 };
 
-// aka. a struct "field"
+// Despite the name, this is used for structs and unions.
 struct ast_struct_declaration {
     struct ast_type type;
     // Optional:

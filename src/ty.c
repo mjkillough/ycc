@@ -36,6 +36,24 @@ static void ty_pprint_member(struct pprint *pp, struct ty_member *member) {
     pprint_newline(pp);
 }
 
+void ty_pprint_struct_union(struct pprint *pp, struct ty *ty) {
+    if (ty->kind == Ty_Struct) {
+        pprintf(pp, "Struct([");
+    } else {
+        pprintf(pp, "Union([");
+    }
+
+    pprint_newline(pp);
+    pprint_indent(pp);
+
+    for (size_t i = 0; i < ty->nmembers; i++) {
+        ty_pprint_member(pp, &ty->members[i]);
+    }
+
+    pprint_unindent(pp);
+    pprintf(pp, "])");
+}
+
 void ty_pprint(struct pprint *pp, struct ty *ty) {
     switch (ty->kind) {
     case Ty_Incomplete:
@@ -52,16 +70,8 @@ void ty_pprint(struct pprint *pp, struct ty *ty) {
         break;
 
     case Ty_Struct:
-        pprintf(pp, "Struct([");
-        pprint_newline(pp);
-        pprint_indent(pp);
-
-        for (size_t i = 0; i < ty->nmembers; i++) {
-            ty_pprint_member(pp, &ty->members[i]);
-        }
-
-        pprint_unindent(pp);
-        pprintf(pp, "])");
+    case Ty_Union:
+        ty_pprint_struct_union(pp, ty);
         break;
     }
 }

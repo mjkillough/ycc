@@ -33,6 +33,7 @@ struct ty {
         Ty_Basic,
         Ty_Pointer,
         Ty_Struct,
+        Ty_Union,
         Ty_Incomplete,
     } kind;
     union {
@@ -40,6 +41,7 @@ struct ty {
         // Ty_Pointer:
         struct ty *inner;
         // Ty_Struct:
+        // Ty_Union:
         struct {
             // Optional:
             struct ident *tag;

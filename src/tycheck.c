@@ -260,18 +260,23 @@ static struct layout *layout_ty(struct ty *ty) {
     }
 }
 
-static struct ty *
-tycheck_type_struct(struct tycheck *tyc, struct ast_type *ast_ty) {
+static struct ty *tycheck_type_struct_union(struct tycheck *tyc,
+                                            struct ast_type *ast_ty) {
     struct vec *members = vec_new(sizeof(struct ty_member));
     for (size_t i = 0; i < ast_ty->ndeclarations; i++) {
         tycheck_struct_declaration(tyc, members, &ast_ty->declarations[i]);
     }
 
     struct ty *ty = malloc(sizeof(struct ty));
-    ty->kind = Ty_Struct;
     ty->tag = ast_ty->ident;
     ty->nmembers = vec_into_raw(members, (void **)&ty->members);
     ty->lookup = map_new(map_key_pointer);
+
+    if (ast_ty->kind == Ast_Type_Struct) {
+        ty->kind = Ty_Struct;
+    } else {
+        ty->kind = Ty_Union;
+    }
 
     tycheck_struct_construct_lookup(tyc, ty->lookup, ty);
 
@@ -285,9 +290,9 @@ tycheck_type_struct(struct tycheck *tyc, struct ast_type *ast_ty) {
         scope_declare(scope, ty->tag, ty);
     }
 
-    struct layout *layout = layout_ty(ty);
-    struct pprint *pp = pprint_new(stdout);
-    layout_pprint(pp, layout);
+    /* struct layout *layout = layout_ty(ty); */
+    /* struct pprint *pp = pprint_new(stdout); */
+    /* layout_pprint(pp, layout); */
 
     return ty;
 }
@@ -297,8 +302,9 @@ static struct ty *tycheck_type(struct tycheck *tyc, struct ast_type *ast_ty) {
     case Ast_Type_BasicType:
         return ty_from_ast_basic(ast_ty->basic);
 
+    case Ast_Type_Union:
     case Ast_Type_Struct:
-        return tycheck_type_struct(tyc, ast_ty);
+        return tycheck_type_struct_union(tyc, ast_ty);
     }
 }
 

@@ -1,0 +1,21 @@
+Function(name=main, Block(
+    Decl(Union(_, [
+        Decl(int, a),
+        Decl(int, b),
+    , ), 
+    Decl(Union(_, [
+        Decl(int, a),
+        Decl(int, b),
+    , c, = 0), 
+    Decl(Union(_, [
+        Decl(Struct(_, [
+            Decl(int, a),
+        , b),
+    , ), 
+    Decl(Struct(_, [
+        Decl(Union(_, [
+            Decl(int, a),
+            Decl(int, b),
+        , _),
+    , )
+))

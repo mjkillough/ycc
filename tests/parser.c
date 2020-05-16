@@ -93,6 +93,13 @@ PARSER_TEST(struct_decl,
             "struct tag { struct no_declarator { int j; }; } k = 0;\n"
             "}")
 
+PARSER_TEST(union_decl, "int main() {\n"
+                        "union { int a; int b; };\n"
+                        "union { int a; int b; } c = 0;\n"
+                        "union { struct { int a; } b; };\n"
+                        "struct { union { int a; int b; }; };\n"
+                        "}")
+
 PARSER_TEST(assignops, "int main() {\n"
                        "a  = 0;\n"
                        "b += 1;\n"

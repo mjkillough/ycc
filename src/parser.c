@@ -479,7 +479,14 @@ parse_result_t parse_struct_declaration(state_t *state,
     return ok();
 }
 
-parse_result_t parse_type_struct(state_t *state, struct ast_type *type) {
+parse_result_t parse_type_struct_union(state_t *state, struct ast_type *type) {
+    if (keyword(state, Keyword_struct)) {
+        type->kind = Ast_Type_Struct;
+    } else if (keyword(state, Keyword_union)) {
+        type->kind = Ast_Type_Union;
+    } else {
+        return error(state, "expected struct or union");
+    }
     advance(state);
 
     // Identifier (aka. tag) is optional.
@@ -506,7 +513,6 @@ parse_result_t parse_type_struct(state_t *state, struct ast_type *type) {
     }
     advance(state);
 
-    type->kind = Ast_Type_Struct;
     type->ident = ident;
     type->ndeclarations =
         vec_into_raw(declarations, (void **)&type->declarations);
@@ -535,8 +541,8 @@ parse_result_t parse_type(state_t *state, struct ast_type *type) {
         }
     }
 
-    if (keyword(state, Keyword_struct)) {
-        return parse_type_struct(state, type);
+    if (keyword(state, Keyword_struct) || keyword(state, Keyword_union)) {
+        return parse_type_struct_union(state, type);
     }
 
     return error(state, "expected int or struct");
@@ -588,7 +594,7 @@ parse_result_t parse_block_item(state_t *state, struct ast_block_item *item){
     bool is_type =
         keyword(state, Keyword_char) || keyword(state, Keyword_short) ||
         keyword(state, Keyword_int) || keyword(state, Keyword_long) ||
-        keyword(state, Keyword_struct);
+        keyword(state, Keyword_struct) || keyword(state, Keyword_union);
     if (is_type) {
         item->kind = Ast_BlockItem_Declaration;
         if (iserror(result = parse_declaration(state, &item->decl))) {

@@ -15,6 +15,7 @@ int main() {
                        "    int c = a + b;\n"
                        "    short d = 0;\n"
                        "    struct { short a; int b; char c; };\n"
+                       "    union { short a; int b; char c; }; \n"
                        "    return c;\n"
                        "}\n"
                        "\n";

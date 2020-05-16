@@ -224,6 +224,46 @@ static struct layout *layout_ty_struct(struct ty *ty) {
     return layout;
 }
 
+static struct layout *layout_ty_union(struct ty *ty) {
+    char alignment = 0;
+    size_t size = 0;
+
+    struct vec *members = vec_new(sizeof(struct layout_member));
+    for (size_t i = 0; i < ty->nmembers; i++) {
+        struct layout *layout = layout_ty(ty->members[i].ty);
+
+        struct layout_member member = {
+            .ident = ty->members[i].ident,
+            .offset = 0,
+            .layout = layout,
+        };
+        vec_append(members, &member);
+
+        // Size the struct to the max size of its members.
+        if (layout->size > size) {
+            size = layout->size;
+        }
+
+        // Align the struct to the max alignment of its members.
+        if (layout->alignment > alignment) {
+            alignment = layout->alignment;
+        }
+    }
+
+    // Add padding at the end so that we're a multiple of our alignment
+    // (stride). This will allow us to have an array of structs and have each
+    // aligned properly.
+    size += alignment_padding(size, alignment);
+
+    struct layout *layout = malloc(sizeof(layout));
+    layout->alignment = alignment;
+    layout->size = size;
+    layout->nmembers = vec_into_raw(members, (void **)&layout->members);
+    layout->lookup = map_new(map_key_pointer);
+
+    return layout;
+}
+
 static struct layout *layout_basic_ty(enum basic_ty ty) {
     struct layout *layout = malloc(sizeof(struct layout));
     layout->nmembers = 0;
@@ -257,6 +297,9 @@ static struct layout *layout_ty(struct ty *ty) {
 
     case Ty_Struct:
         return layout_ty_struct(ty);
+
+    case Ty_Union:
+        return layout_ty_union(ty);
     }
 }
 
@@ -290,9 +333,9 @@ static struct ty *tycheck_type_struct_union(struct tycheck *tyc,
         scope_declare(scope, ty->tag, ty);
     }
 
-    /* struct layout *layout = layout_ty(ty); */
-    /* struct pprint *pp = pprint_new(stdout); */
-    /* layout_pprint(pp, layout); */
+    struct layout *layout = layout_ty(ty);
+    struct pprint *pp = pprint_new(stdout);
+    layout_pprint(pp, layout);
 
     return ty;
 }

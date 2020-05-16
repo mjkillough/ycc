@@ -208,7 +208,7 @@ static void layout_pprint(struct pprint *pp, struct layout *layout) {
         return;
     }
 
-    pprintf(pp, " ");
+    pprintf(pp, ", ");
     if (layout->nmembers > 1) {
         pprintf(pp, "[");
         pprint_newline(pp);
@@ -235,7 +235,7 @@ static void layout_pprint(struct pprint *pp, struct layout *layout) {
 static struct layout *layout_ty(struct ty *ty);
 
 static struct layout *layout_ty_struct(struct ty *ty) {
-    size_t alignment = 0;
+    char alignment = 0;
     size_t size = 0;
 
     struct vec *members = vec_new(sizeof(struct layout_member));
@@ -248,13 +248,16 @@ static struct layout *layout_ty_struct(struct ty *ty) {
             .offset = size,
             .layout = layout,
         };
-
         vec_append(members, &member);
 
         size += layout->size;
+
+        // Align the struct to the max alignment of its members.
+        if (layout->alignment > alignment) {
+            alignment = layout->alignment;
+        }
     }
 
-    // TODO: Alignment to stride.
     struct layout *layout = malloc(sizeof(layout));
     layout->alignment = alignment;
     layout->size = size;

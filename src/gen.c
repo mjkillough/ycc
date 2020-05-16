@@ -7,18 +7,22 @@
 #include "common.h"
 #include "gen.h"
 #include "ident.h"
+#include "layout.h"
 #include "map.h"
+#include "scope.h"
 
 struct state {
     FILE *f;
-    struct map *env;
+
     size_t stack_idx;
+
+    struct scope *env;
+
     uint64_t label_idx;
 };
 
-static size_t
-var_idx(struct state *s, const struct ident *ident) {
-    return (size_t)map_get(s->env, ident);
+static size_t var_idx(struct state *s, struct ident *ident) {
+    return *(size_t *)scope_get(s->env, ident);
 }
 
 static bool gen_expr(struct state *s, ast_expr_t *expr) {
@@ -201,9 +205,18 @@ static bool gen_declaration(struct state *s, struct ast_declaration *decl) {
         // TODO: We can avoid the push and just decrement the stack pointer if
         // we don't have an expr.
         fprintf(s->f, "pushq %%rax\n");
-        map_insert(s->env, _declarator_ident(&decl->declarators[i]),
-                   (void *)s->stack_idx);
-        s->stack_idx += 8;
+
+        struct ast_declarator *declarator = &decl->declarators[i];
+        struct layout *layout = layout_ty(declarator->ty);
+
+        s->stack_idx += alignment_padding(s->stack_idx, layout->alignment);
+
+        size_t *idx = malloc(sizeof(size_t));
+        *idx = s->stack_idx;
+
+        scope_declare(s->env, declarator->ident, idx);
+
+        s->stack_idx += layout->size;
     }
 
     return true;
@@ -227,7 +240,7 @@ static bool gen_block(struct state *s, ast_block_t *block) {
 static bool gen_function(FILE *f, ast_function_t *func) {
     struct state s = {
         .f = f,
-        .env = map_new(map_key_pointer),
+        .env = scope_new(),
         .stack_idx = 8,
     };
     fprintf(s.f, " .globl %s\n", ident_to_str(func->ident));

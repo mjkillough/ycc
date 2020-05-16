@@ -10,11 +10,12 @@
 
 int main() {
     const char *prog = "int main() {\n"
-                       "    int a = 1, b;\n"
+                       "    long a = 1, b;\n"
                        "    b = 2;\n"
-                       "    int c = a + b;\n"
+                       "    long c = a + b;\n"
                        "    short d = 0;\n"
-                       "    struct { short a; int b; char c; };\n"
+                       "    struct { short a; int b; char c; } f;\n"
+                       "    int g = 0;\n"
                        "    union { short a; int b; char c; }; \n"
                        "    return c;\n"
                        "}\n"
@@ -51,9 +52,9 @@ int main() {
     ast_pprint_program(pp, &program);
     pprint_free(pp);
 
-    /* printf("---\n\n"); */
-    /* printf("ASM:\n"); */
-    /* gen_generate(stdout, program); */
+    printf("---\n\n");
+    printf("ASM:\n");
+    gen_generate(stdout, program);
 
     FILE *f = fopen("out.s", "w");
     if (f == NULL) {

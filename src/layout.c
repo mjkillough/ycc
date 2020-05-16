@@ -15,23 +15,6 @@ size_t alignment_padding(size_t base, size_t alignment) {
     return alignment - delta;
 }
 
-struct layout {
-    char alignment;
-    size_t size;
-
-    struct layout_member *members;
-    size_t nmembers;
-
-    // map[struct ident*]struct layout_member*
-    struct map *lookup;
-};
-
-struct layout_member {
-    struct ident *ident;
-    size_t offset;
-    struct layout *layout;
-};
-
 static void layout_pprint_member(struct pprint *pp,
                                  struct layout_member *member) {
     pprintf(pp, "(%s, %zu, ", ident_to_str(member->ident), member->offset);
